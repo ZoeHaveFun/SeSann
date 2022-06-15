@@ -1,5 +1,4 @@
 import './App.css';
-// import db from './firestore';
 
 function App() {
   return (
