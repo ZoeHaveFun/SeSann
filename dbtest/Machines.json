@@ -1,0 +1,64 @@
+[
+  {
+    "machine_name": "洗衣一號",
+    "store_id": "00001",
+    "machine_id": "00001_01",
+    "type": "wash",
+    "status": 1 ,
+    "categorys": [
+      {
+        "name": "快洗",
+        "time": 31,
+        "price": 50
+      },
+      {
+        "name": "標準洗",
+        "time": 35,
+        "price": 60
+      },
+      {
+        "name": "柔洗",
+        "time": 41,
+        "price": 70
+      }
+    ],
+    "processing":{
+      "user_name": "阿如",
+      "user_id": "002",
+      "start_time": 1655271234,
+      "end_time": 1655271123,
+      "categorys": {
+        "name": "標準洗",
+        "time": 35,
+        "price": 60
+      } 
+    },
+    "reserveIds": []
+  },
+  {
+    "machine_name": "烘衣一號",
+    "store_id": "00001",
+    "machine_id": "00001_02",
+    "type": "dry",
+    "status": 0 ,
+    "categorys": [
+      {
+        "name": "微微烘",
+        "time": 30,
+        "price": 50
+      },
+      {
+        "name": "標準烘",
+        "time": 36,
+        "price": 60
+      },
+      {
+        "name": "超級烘",
+        "time": 42,
+        "price": 70
+      }
+    ],
+    "processing":{},
+    "reserve": []
+  }
+]
