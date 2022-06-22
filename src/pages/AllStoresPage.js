@@ -70,6 +70,10 @@ function AllStoresPage() {
     };
     return firebaseStores.postSnapshot(handleStoresUpdate);
   }, []);
+  useEffect(() => {
+    const userId = 'mVJla3AyVysvFzWzUSG5';
+    window.localStorage.setItem('userId', userId);
+  }, []);
   return (
     <div>
       <Link to="/user/processing">我的帳戶</Link>

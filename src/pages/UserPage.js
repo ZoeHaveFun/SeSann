@@ -31,16 +31,14 @@ const Button = styled(Link)`
 `;
 
 function UserPage() {
-  const userId = 'mVJla3AyVysvFzWzUSG5';
+  const [userId] = useState(localStorage.getItem('userId'));
   const [userInfo, setUserInfo] = useState({});
-  const [userOders, setUserOders] = useState({});
 
   const { CreateContext } = firebaseUsers;
   useEffect(() => {
     firebaseUsers.get(userId)
       .then((res) => {
         setUserInfo(res);
-        setUserOders(res.orders);
       });
   }, [userId]);
 
@@ -61,7 +59,7 @@ function UserPage() {
             <Button to="/user/reserve">預約中</Button>
             <Button to="/user/orders">全部訂單</Button>
           </TabBar>
-          <CreateContext.Provider value={userOders}>
+          <CreateContext.Provider value={userInfo}>
             <Outlet />
           </CreateContext.Provider>
         </TabWrapper>

@@ -1,15 +1,16 @@
-import { useEffect, useState } from 'react';
-import { firebaseReserve } from '../firestore';
+import { useEffect, useState, useContext } from 'react';
+import { firebaseReserve, firebaseUsers } from '../firestore';
 import { ReserveList } from '../components/List';
 
 function ReservePage() {
   const [reserves, setReserves] = useState([]);
-  const userId = 'mVJla3AyVysvFzWzUSG5';
+  const userInfo = useContext(firebaseUsers.CreateContext);
+  const userId = userInfo.user_id;
   useEffect(() => {
     firebaseReserve.getQuery(userId, 'user_id')
       .then((res) => res.map((item) => item.data()))
       .then((data) => setReserves(data));
-  }, []);
+  }, [userId]);
   return (
     <div>
       {

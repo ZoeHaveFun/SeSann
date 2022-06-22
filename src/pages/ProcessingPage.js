@@ -1,15 +1,16 @@
-import { useEffect, useState } from 'react';
-import { firebaseProcessing } from '../firestore';
+import { useEffect, useState, useContext } from 'react';
+import { firebaseProcessing, firebaseUsers } from '../firestore';
 import { ProcessinfList } from '../components/List';
 
 function ProcessingPage() {
   const [process, setProcess] = useState([]);
-  const userId = 'mVJla3AyVysvFzWzUSG5';
+  const userInfo = useContext(firebaseUsers.CreateContext);
+  const userId = userInfo.user_id;
   useEffect(() => {
     firebaseProcessing.getQuery(userId, 'user_id')
       .then((res) => res.map((item) => item.data()))
       .then((data) => setProcess(data));
-  }, []);
+  }, [userId]);
   return (
     <div>
       {
