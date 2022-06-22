@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { PropTypes } from 'prop-types';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
-import { firebaseProcessing, firebaseUsers } from '../../firestore';
+import { firebaseProcessing, firebaseUsers, firebaseMachines } from '../../firestore';
 
 const duration = require('dayjs/plugin/duration');
 
@@ -31,51 +31,53 @@ export function OrderList({ item }) {
 export function ReserveList({ item }) {
   return (
     <Wrapper>
-      <span>{item.store_name}</span>
+      <span>{`${item.store_name} ${dayjs(item.reserve_time).format('YYYY/MM/DD HH:mm:ss')}`}</span>
       <span>{item.machine_name}</span>
       <span>{`${item.category.name} ${item.category.time}分鐘`}</span>
-      <span>{`預計等待時間${item.reserve_time}`}</span>
+      <span>{`預計到你的時間${dayjs(item.estimate_startTime).format('Ahh : mm')}`}</span>
     </Wrapper>
   );
 }
 
 export function ProcessinfList({ item }) {
-  const [timeOut, setTimeOut] = useState();
+  const [countDown, setCountDown] = useState();
+
   useEffect(() => {
+    const handleFinished = () => {
+      const ordersData = {};
+      firebaseProcessing.getOne(item.process_id)
+        .then((res) => {
+          ordersData.category = res.category;
+          ordersData.machine_id = res.machine_id;
+          ordersData.machine_name = res.machine_name;
+          ordersData.start_time = res.start_time;
+          ordersData.store_id = res.store_id;
+          ordersData.store_name = res.store_name;
+          firebaseUsers.addOrders(res.user_id, ordersData);
+        })
+        .then(() => { firebaseProcessing.delet(item.process_id); });
+      firebaseMachines.updateStatus(item.machine_id, 0);
+    };
     if (item.process_id) {
-      // const stopProcess = () => {
-      //   clearInterval(countDown);
-      // };
-      setInterval(() => {
+      const handleCountDown = setInterval(() => {
         const endTimer = dayjs(item.end_time);
         const timeLeft = dayjs.duration(endTimer.diff(dayjs())).$d;
         if (timeLeft.minutes < 1 && timeLeft.seconds < 1) {
-          // stopProcess();
-          const ordersData = {};
-          firebaseProcessing.getOne(item.process_id)
-            .then((res) => {
-              ordersData.category = res.category;
-              ordersData.machine_id = res.machine_id;
-              ordersData.machine_name = res.machine_name;
-              ordersData.start_time = res.start_time;
-              ordersData.store_name = res.store_name;
-
-              return firebaseUsers.addOrders(res.user_id, ordersData);
-            });
-          // .then((res.process_id) => console.log();)
+          clearInterval(handleCountDown);
+          handleFinished();
         } else {
-          setTimeOut(`${timeLeft.minutes} : ${timeLeft.seconds}`);
+          setCountDown(`${timeLeft.minutes} : ${timeLeft.seconds}`);
         }
       }, 1000);
     }
-  }, [item.end_time, item.process_id]);
+  }, [item.process_id, item.end_time, item.machine_id]);
 
   return (
     <Wrapper>
-      <span>{item.store_name}</span>
+      <span>{`${item.store_name} ${dayjs(item.start_time).format('YYYY/MM/DD HH:mm:ss')}`}</span>
       <span>{item.machine_name}</span>
       <span>{`${item.category.name} ${item.category.time}分鐘`}</span>
-      <span id={item.process_id}>{`運轉倒數時間${timeOut}`}</span>
+      <span id={item.process_id}>{`運轉倒數時間${countDown}`}</span>
     </Wrapper>
   );
 }
@@ -104,6 +106,7 @@ ReserveList.propTypes = {
     store_id: PropTypes.string.isRequired,
     store_name: PropTypes.string.isRequired,
     reserve_time: PropTypes.string.isRequired,
+    estimate_startTime: PropTypes.string.isRequired,
     category: PropTypes.shape({
       name: PropTypes.string.isRequired,
       price: PropTypes.number.isRequired,

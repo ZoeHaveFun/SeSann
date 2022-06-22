@@ -54,12 +54,16 @@ export const firebaseMachines = {
     const docSnap = await getDoc(docRef);
     return docSnap.data();
   },
-  set(MachineId, data) {
+  updateStatus(MachineId, data) {
     updateDoc(doc(db, 'Machines', MachineId), {
-      processing: data,
+      status: data,
     });
   },
-
+  updateReserveIds(MachineId, data) {
+    updateDoc(doc(db, 'Machines', MachineId), {
+      reserveIds: data,
+    });
+  },
 };
 
 export const firebaseUsers = {
@@ -85,9 +89,10 @@ export const firebaseReserve = {
   post(postData) {
     const data = doc(collection(db, this.tableName));
     setDoc(data, { ...postData, reserve_id: data.id });
+    return data.id;
   },
-  async getQuery(userId, key) {
-    const q = query(collection(db, this.tableName), where(key, '==', userId));
+  async getQuery(Id, key) {
+    const q = query(collection(db, this.tableName), where(key, '==', Id));
     const data = await getDocs(q);
     return data.docs;
   },
@@ -99,8 +104,8 @@ export const firebaseProcessing = {
     const data = doc(collection(db, this.tableName));
     setDoc(data, { ...postData, process_id: data.id });
   },
-  async getQuery(userId, key) {
-    const q = query(collection(db, this.tableName), where(key, '==', userId));
+  async getQuery(Id, key) {
+    const q = query(collection(db, this.tableName), where(key, '==', Id));
     const data = await getDocs(q);
     return data.docs;
   },
