@@ -1,4 +1,5 @@
 import { initializeApp } from 'firebase/app';
+import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import {
   getFirestore, setDoc, collection, getDocs, onSnapshot, doc, query, where, getDoc,
   updateDoc, deleteDoc,
@@ -16,7 +17,53 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 export const db = getFirestore(app);
+
+export const firebaseUsers = {
+  tableName: 'Users',
+  async register(name, email, password) {
+    const result = await createUserWithEmailAndPassword(auth, email, password);
+    await setDoc(doc(db, this.tableName, result.user.uid), {
+      user_id: result.user.uid,
+      user_name: name,
+      points: 300,
+      orders: [],
+      storeIds: [],
+    });
+  },
+  async login(email, password) {
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    const userInfo = await firebaseUsers.get(result.user.uid);
+    return userInfo;
+  },
+  onUserShot(userId, callback) {
+    return onSnapshot(doc(db, this.tableName, userId), (Info) => {
+      const newData = Info.data();
+      callback(newData);
+    });
+  },
+  async get(userId) {
+    const docRef = doc(db, this.tableName, userId);
+    const docSnap = await getDoc(docRef);
+    return docSnap.data();
+  },
+  userContext: createContext({}),
+  async addOrders(Id, data) {
+    const docSnap = await getDoc(doc(db, this.tableName, Id));
+    const orderData = docSnap.data().orders;
+    orderData.push(data);
+    updateDoc(doc(db, this.tableName, Id), {
+      orders: orderData,
+    });
+  },
+  async updatePointes(UserId, price) {
+    const userInfo = await firebaseUsers.get(UserId);
+    updateDoc(doc(db, this.tableName, UserId), {
+      points: userInfo.points - price,
+    });
+  },
+};
 
 export const firebaseStores = {
   tableName: 'Stores',
@@ -24,8 +71,14 @@ export const firebaseStores = {
     const data = doc(collection(db, this.tableName));
     setDoc(data, { ...postData, store_id: data.id });
   },
-  postSnapshot(callback) {
-    return onSnapshot(collection(db, this.tableName), callback);
+  onStoresShot(callback) {
+    return onSnapshot(collection(db, this.tableName), (data) => {
+      const newData = [];
+      data.forEach((item) => {
+        newData.push(item.data());
+      });
+      callback(newData);
+    });
   },
   async getAll() {
     const data = await getDocs(collection(db, this.tableName));
@@ -44,10 +97,15 @@ export const firebaseMachines = {
     const data = doc(collection(db, this.tableName));
     setDoc(data, { ...postData, machine_id: data.id });
   },
-  async getQuery(storeId, key) {
+  onMachinesShot(storeId, key, callback) {
     const q = query(collection(db, this.tableName), where(key, '==', storeId));
-    const data = await getDocs(q);
-    return data.docs;
+    return onSnapshot(q, (data) => {
+      const newData = [];
+      data.forEach((item) => {
+        newData.push(item.data());
+      });
+      callback(newData);
+    });
   },
   async getOne(MachineId) {
     const docRef = doc(db, this.tableName, MachineId);
@@ -55,31 +113,13 @@ export const firebaseMachines = {
     return docSnap.data();
   },
   updateStatus(MachineId, data) {
-    updateDoc(doc(db, 'Machines', MachineId), {
+    updateDoc(doc(db, this.tableName, MachineId), {
       status: data,
     });
   },
   updateReserveIds(MachineId, data) {
-    updateDoc(doc(db, 'Machines', MachineId), {
+    updateDoc(doc(db, this.tableName, MachineId), {
       reserveIds: data,
-    });
-  },
-};
-
-export const firebaseUsers = {
-  tableName: 'Users',
-  async get(userId) {
-    const docRef = doc(db, this.tableName, userId);
-    const docSnap = await getDoc(docRef);
-    return docSnap.data();
-  },
-  CreateContext: createContext(),
-  async addOrders(Id, data) {
-    const docSnap = await getDoc(doc(db, this.tableName, Id));
-    const orderData = docSnap.data().orders;
-    orderData.push(data);
-    updateDoc(doc(db, this.tableName, Id), {
-      orders: orderData,
     });
   },
 };
@@ -91,10 +131,28 @@ export const firebaseReserve = {
     setDoc(data, { ...postData, reserve_id: data.id });
     return data.id;
   },
+  onReserveShot(Id, key, callback) {
+    const q = query(collection(db, this.tableName), where(key, '==', Id));
+    return onSnapshot(q, (data) => {
+      const newData = [];
+      data.forEach((item) => {
+        newData.push(item.data());
+      });
+      callback(newData);
+    });
+  },
   async getQuery(Id, key) {
     const q = query(collection(db, this.tableName), where(key, '==', Id));
     const data = await getDocs(q);
     return data.docs;
+  },
+  async getOne(ReserveId) {
+    const docRef = doc(db, this.tableName, ReserveId);
+    const docSnap = await getDoc(docRef);
+    return docSnap.data();
+  },
+  async delet(Id) {
+    await deleteDoc(doc(db, this.tableName, Id));
   },
 };
 
@@ -103,6 +161,16 @@ export const firebaseProcessing = {
   post(postData) {
     const data = doc(collection(db, this.tableName));
     setDoc(data, { ...postData, process_id: data.id });
+  },
+  onProcessingShot(Id, key, callback) {
+    const q = query(collection(db, this.tableName), where(key, '==', Id));
+    return onSnapshot(q, (data) => {
+      const newData = [];
+      data.forEach((item) => {
+        newData.push(item.data());
+      });
+      callback(newData);
+    });
   },
   async getQuery(Id, key) {
     const q = query(collection(db, this.tableName), where(key, '==', Id));

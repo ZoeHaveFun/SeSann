@@ -1,8 +1,9 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PropTypes } from 'prop-types';
 import styled from 'styled-components/macro';
-import { firebaseStores } from '../firestore';
+import { firebaseStores, firebaseUsers } from '../firestore';
 
 const StoreCard = styled.div`
   padding: 10px 20px;
@@ -16,6 +17,71 @@ const StoreCard = styled.div`
     flex: 2;
   }
 `;
+
+function RegisterForm() {
+  const registerName = useRef();
+  const registerEmail = useRef();
+  const registerPassword = useRef();
+
+  const postRegister = () => {
+    firebaseUsers.register(
+      registerName.current.value,
+      registerEmail.current.value,
+      registerPassword.current.value,
+    );
+
+    registerName.current.value = '';
+    registerEmail.current.value = '';
+    registerPassword.current.value = '';
+  };
+  return (
+    <div>
+      <h2>會員註冊</h2>
+      <label htmlFor="registerName">
+        名稱
+        <input type="text" name="registerName" placeholder="怎麼稱呼你呢" ref={registerName} />
+      </label>
+      <label htmlFor="registerEmail">
+        Email
+        <input type="email" name="registerEmail" placeholder="輸入email" ref={registerEmail} />
+      </label>
+      <label htmlFor="registerPassword">
+        密碼
+        <input type="password" name="registerPassword" placeholder="輸入密碼" ref={registerPassword} />
+      </label>
+      <button type="button" onClick={postRegister}>註冊</button>
+    </div>
+  );
+}
+
+function LoginForm() {
+  const loginEmail = useRef();
+  const loginPassword = useRef();
+
+  const postLogin = () => {
+    const userInfo = firebaseUsers.login(
+      loginEmail.current.value,
+      loginPassword.current.value,
+    );
+
+    loginEmail.current.value = '';
+    loginPassword.current.value = '';
+  };
+  return (
+    <div>
+      <h2>會員登入</h2>
+      <label htmlFor="loginEmail">
+        Email
+        <input type="email" name="loginEmail" placeholder="輸入email" ref={loginEmail} />
+      </label>
+      <label htmlFor="loginPassword">
+        密碼
+        <input type="password" name="loginPassword" placeholder="輸入密碼" ref={loginPassword} />
+      </label>
+      <button type="button" onClick={postLogin}>登入</button>
+    </div>
+  );
+}
 
 function Store({ item }) {
   return (
@@ -54,21 +120,11 @@ function AllStoresPage() {
     storeNameRef.current.value = '';
     storePhoneRef.current.value = '';
   };
-  const handleGet = () => {
-    firebaseStores.getAll()
-      .then((res) => res.map((item) => item.data()))
-      .then((data) => setStores(data));
-  };
-  useEffect(() => { handleGet(); }, []);
   useEffect(() => {
-    const handleStoresUpdate = (data) => {
-      const newData = [];
-      data.forEach((doc) => {
-        newData.push(doc.data());
-      });
+    const handleStoresUpdate = (newData) => {
       setStores(newData);
     };
-    return firebaseStores.postSnapshot(handleStoresUpdate);
+    return firebaseStores.onStoresShot(handleStoresUpdate);
   }, []);
   useEffect(() => {
     const userId = 'mVJla3AyVysvFzWzUSG5';
@@ -77,6 +133,8 @@ function AllStoresPage() {
   return (
     <div>
       <Link to="/user/processing">我的帳戶</Link>
+      <RegisterForm />
+      <LoginForm />
       <ul>
         <li>
           <span>店家名稱</span>
