@@ -1,10 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+/* eslint-disable no-console */
+import {
+  useEffect, useRef, useState,
+} from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { PropTypes } from 'prop-types';
 import styled from 'styled-components/macro';
 import dayjs from 'dayjs';
 import {
-  firebaseMachines, firebaseStores, firebaseProcessing, firebaseReserve,
+  firebaseMachines, firebaseStores, firebaseProcessing, firebaseReserve, firebaseUsers,
 } from '../firestore';
 
 const duration = require('dayjs/plugin/duration');
@@ -147,11 +150,10 @@ function MachineCard({ machine, handleProcessing, handleReserve }) {
   const totalTime = () => reverveList.reduce((pre, current) => pre + current.category.time, 0);
 
   useEffect(() => {
-    firebaseReserve.getQuery(machine.machine_id, 'machine_id')
-      .then((res) => res.map((docc) => docc.data()))
-      .then((data) => {
-        setReverveList(data);
-      });
+    const handleReserveUpdate = (newData) => {
+      setReverveList(newData);
+    };
+    return firebaseReserve.onReserveShot(machine.machine_id, 'machine_id', handleReserveUpdate);
   }, [machine.machine_id]);
 
   return (
@@ -207,6 +209,8 @@ function MachineCard({ machine, handleProcessing, handleReserve }) {
 }
 
 function StorePage() {
+  const [userId] = useState(localStorage.getItem('userId'));
+  const [userReserveLists, setUserReserveLists] = useState([]);
   const storeId = useLocation().search.split('=')[1];
   const [storeInfo, setStoreInfo] = useState({});
   const [machines, setMachines] = useState([]);
@@ -214,10 +218,10 @@ function StorePage() {
 
   const getProcessEndtime = (machineId) => firebaseProcessing.getQuery(machineId, 'machine_id')
     .then((res) => res.map((docc) => docc.data()))
-    .then((data) => data[0].end_time);
+    .then((data) => data[0].end_time.seconds * 1000);
   const getPrevEstimateEndTime = (reserveId) => firebaseReserve.getQuery(reserveId, 'reserve_id')
     .then((res) => res.map((docc) => docc.data()))
-    .then((data) => data[0].estimate_endTime);
+    .then((data) => data[0].estimate_endTime.seconds * 1000);
 
   const handleReserve = async (machineId, categoryIndex) => {
     const selectMachine = machines.filter((machine) => machine.machine_id === machineId)[0];
@@ -236,12 +240,12 @@ function StorePage() {
     reserveData.machine_name = selectMachine.machine_name;
     reserveData.store_id = selectMachine.store_id;
     reserveData.store_name = storeInfo.store_name;
-    reserveData.reserve_time = dayjs().valueOf();
+    reserveData.reserve_time = dayjs().$d;
 
     if (newReserveIds.length === 0) {
       const processItemEndtime = await getProcessEndtime(machineId);
-      reserveData.estimate_startTime = processItemEndtime;
-      reserveData.estimate_endTime = dayjs(reserveData.estimate_startTime).add(reserveData.category.time + flexibleTime, 'minute').valueOf();
+      reserveData.estimate_startTime = dayjs(processItemEndtime).add(flexibleTime, 'minute').$d;
+      reserveData.estimate_endTime = dayjs(reserveData.estimate_startTime).add(reserveData.category.time, 'minute').$d;
       const reserveId = firebaseReserve.post(reserveData);
       newReserveIds.push(reserveId);
       firebaseMachines.updateReserveIds(machineId, newReserveIds);
@@ -250,31 +254,48 @@ function StorePage() {
     const prevEstimateEndTime = await getPrevEstimateEndTime(
       newReserveIds[newReserveIds.length - 1],
     );
-    reserveData.estimate_startTime = prevEstimateEndTime;
-    reserveData.estimate_endTime = dayjs(reserveData.estimate_startTime).add(reserveData.category.time + flexibleTime, 'minute').valueOf();
+    reserveData.estimate_startTime = dayjs(prevEstimateEndTime).add(flexibleTime, 'minute').$d;
+    reserveData.estimate_endTime = dayjs(reserveData.estimate_startTime).add(reserveData.category.time, 'minute').$d;
     const reserveId = firebaseReserve.post(reserveData);
     newReserveIds.push(reserveId);
     firebaseMachines.updateReserveIds(machineId, newReserveIds);
   };
 
-  const handleProcessing = (machineId, categoryIndex) => {
+  const handleProcessing = async (machineId, categoryIndex) => {
     if (categoryIndex === null) {
       return;
     }
+
     const selectMachine = machines.filter((machine) => machine.machine_id === machineId)[0];
     const processingData = {};
+    const checkUserReserved = userReserveLists.filter(
+      (item) => item.reserve_id === selectMachine.reserveIds[0],
+    );
 
+    if (selectMachine.reserveIds[0] !== undefined
+          && checkUserReserved.length === 0
+    ) {
+      console.log('你不是下一位餒 乖乖排隊');
+    }
     processingData.category = selectMachine.categorys[categoryIndex];
     processingData.user_id = 'mVJla3AyVysvFzWzUSG5';
     processingData.machine_id = selectMachine.machine_id;
     processingData.machine_name = selectMachine.machine_name;
     processingData.store_id = selectMachine.store_id;
     processingData.store_name = storeInfo.store_name;
-    processingData.start_time = dayjs().valueOf();
-    processingData.end_time = dayjs().add(processingData.category.time, 'minute').valueOf();
+    processingData.start_time = dayjs().$d;
+    processingData.end_time = dayjs().add(processingData.category.time, 'minute').$d;
 
     firebaseProcessing.post(processingData);
     firebaseMachines.updateStatus(machineId, 1);
+    firebaseUsers.updatePointes(userId, processingData.category.price);
+
+    if (checkUserReserved.length !== 0) {
+      const newReserveIds = [...selectMachine.reserveIds];
+      newReserveIds.shift();
+      firebaseMachines.updateReserveIds(machineId, newReserveIds);
+      firebaseReserve.delet(checkUserReserved[0].reserve_id);
+    }
   };
 
   useEffect(() => {
@@ -282,10 +303,17 @@ function StorePage() {
       .then((res) => setStoreInfo(res));
   }, [storeId]);
   useEffect(() => {
-    firebaseMachines.getQuery(storeId, 'store_id')
-      .then((res) => res.map((item) => item.data()))
-      .then((data) => setMachines(data));
+    const handleMachinessUpdate = (newData) => {
+      setMachines(newData);
+    };
+    return firebaseMachines.onMachinesShot(storeId, 'store_id', handleMachinessUpdate);
   }, [storeId]);
+  useEffect(() => {
+    const handleUserReserve = (newData) => {
+      setUserReserveLists(newData);
+    };
+    return firebaseReserve.onReserveShot(userId, 'user_id', handleUserReserve);
+  }, [userId]);
 
   return (
     <>

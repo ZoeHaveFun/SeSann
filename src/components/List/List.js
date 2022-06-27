@@ -2,7 +2,9 @@ import styled from 'styled-components';
 import { PropTypes } from 'prop-types';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
-import { firebaseProcessing, firebaseUsers, firebaseMachines } from '../../firestore';
+import {
+  firebaseUsers, firebaseMachines, firebaseProcessing,
+} from '../../firestore';
 
 const duration = require('dayjs/plugin/duration');
 
@@ -20,7 +22,7 @@ const Wrapper = styled.div`
 export function OrderList({ item }) {
   return (
     <Wrapper>
-      <span>{`${item.store_name} ${dayjs(item.start_time).format('YYYY/MM/DD HH:mm:ss')}`}</span>
+      <span>{`${item.store_name} ${dayjs(item.start_time.seconds * 1000).format('YYYY/MM/DD HH:mm:ss')}`}</span>
       <span>{item.machine_name}</span>
       <span>{`${item.category.name} ${item.category.time}分鐘`}</span>
       <span>{`$${item.category.price}`}</span>
@@ -31,10 +33,10 @@ export function OrderList({ item }) {
 export function ReserveList({ item }) {
   return (
     <Wrapper>
-      <span>{`${item.store_name} ${dayjs(item.reserve_time).format('YYYY/MM/DD HH:mm:ss')}`}</span>
+      <span>{`${item.store_name} ${dayjs(item.reserve_time.seconds * 1000).format('YYYY/MM/DD HH:mm:ss')}`}</span>
       <span>{item.machine_name}</span>
       <span>{`${item.category.name} ${item.category.time}分鐘`}</span>
-      <span>{`預計到你的時間${dayjs(item.estimate_startTime).format('Ahh : mm')}`}</span>
+      <span>{`預計到你的時間${dayjs(item.estimate_startTime.seconds * 1000).format('Ahh : mm')}`}</span>
     </Wrapper>
   );
 }
@@ -45,22 +47,21 @@ export function ProcessinfList({ item }) {
   useEffect(() => {
     const handleFinished = () => {
       const ordersData = {};
-      firebaseProcessing.getOne(item.process_id)
-        .then((res) => {
-          ordersData.category = res.category;
-          ordersData.machine_id = res.machine_id;
-          ordersData.machine_name = res.machine_name;
-          ordersData.start_time = res.start_time;
-          ordersData.store_id = res.store_id;
-          ordersData.store_name = res.store_name;
-          firebaseUsers.addOrders(res.user_id, ordersData);
-        })
-        .then(() => { firebaseProcessing.delet(item.process_id); });
+
+      ordersData.category = item.category;
+      ordersData.machine_id = item.machine_id;
+      ordersData.machine_name = item.machine_name;
+      ordersData.start_time = item.start_time;
+      ordersData.store_id = item.store_id;
+      ordersData.store_name = item.store_name;
+
+      firebaseUsers.addOrders(item.user_id, ordersData);
+      firebaseProcessing.delet(item.process_id);
       firebaseMachines.updateStatus(item.machine_id, 0);
     };
     if (item.process_id) {
       const handleCountDown = setInterval(() => {
-        const endTimer = dayjs(item.end_time);
+        const endTimer = dayjs(item.end_time.seconds * 1000);
         const timeLeft = dayjs.duration(endTimer.diff(dayjs())).$d;
         if (timeLeft.minutes < 1 && timeLeft.seconds < 1) {
           clearInterval(handleCountDown);
@@ -70,11 +71,11 @@ export function ProcessinfList({ item }) {
         }
       }, 1000);
     }
-  }, [item.process_id, item.end_time, item.machine_id]);
+  }, [item.process_id, item.end_time, item.machine_id, item]);
 
   return (
     <Wrapper>
-      <span>{`${item.store_name} ${dayjs(item.start_time).format('YYYY/MM/DD HH:mm:ss')}`}</span>
+      <span>{`${item.store_name} ${dayjs(item.start_time.seconds * 1000).format('YYYY/MM/DD HH:mm:ss')}`}</span>
       <span>{item.machine_name}</span>
       <span>{`${item.category.name} ${item.category.time}分鐘`}</span>
       <span id={item.process_id}>{`運轉倒數時間${countDown}`}</span>
@@ -84,9 +85,14 @@ export function ProcessinfList({ item }) {
 
 ProcessinfList.propTypes = {
   item: PropTypes.shape({
+    user_id: PropTypes.string.isRequired,
     process_id: PropTypes.string.isRequired,
-    end_time: PropTypes.number,
-    start_time: PropTypes.number,
+    end_time: PropTypes.shape({
+      seconds: PropTypes.number.isRequired,
+    }).isRequired,
+    start_time: PropTypes.shape({
+      seconds: PropTypes.number.isRequired,
+    }).isRequired,
     machine_id: PropTypes.string.isRequired,
     machine_name: PropTypes.string.isRequired,
     store_id: PropTypes.string,
@@ -105,8 +111,12 @@ ReserveList.propTypes = {
     machine_name: PropTypes.string.isRequired,
     store_id: PropTypes.string.isRequired,
     store_name: PropTypes.string.isRequired,
-    reserve_time: PropTypes.string.isRequired,
-    estimate_startTime: PropTypes.string.isRequired,
+    reserve_time: PropTypes.shape({
+      seconds: PropTypes.number.isRequired,
+    }).isRequired,
+    estimate_startTime: PropTypes.shape({
+      seconds: PropTypes.number.isRequired,
+    }).isRequired,
     category: PropTypes.shape({
       name: PropTypes.string.isRequired,
       price: PropTypes.number.isRequired,
