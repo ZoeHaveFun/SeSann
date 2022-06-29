@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import { useEffect, useState, useContext } from 'react';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { PropTypes } from 'prop-types';
 import styled from 'styled-components/macro';
 import dayjs from 'dayjs';
-import { firebaseUsers, firebaseReserve } from '../firestore';
+import { firebaseUsers, firebaseReserve } from '../utils/firestore';
 
 const duration = require('dayjs/plugin/duration');
 
@@ -84,16 +84,15 @@ function RemindCard({ remind }) {
 }
 
 function UserPage() {
-  const [userId] = useState(localStorage.getItem('userId'));
-  const [userInfo, setUserInfo] = useState({});
   const [reminds, setReminds] = useState([]);
-  const { userContext } = firebaseUsers;
+  const userInfo = useContext(firebaseUsers.AuthContext);
+  const userId = userInfo.user_id;
+  const navegate = useNavigate();
 
-  useEffect(() => {
-    firebaseUsers.get(userId)
-      .then((res) => { setUserInfo(res); });
-  }, [userId]);
-
+  const Logout = () => {
+    firebaseUsers.signOut();
+    navegate('/', { replace: true });
+  };
   useEffect(() => {
     firebaseReserve.getQuery(userId, 'user_id')
       .then((res) => res.map((item) => item.data()))
@@ -111,7 +110,22 @@ function UserPage() {
   return (
     <>
       <Link to="/">回到首頁</Link>
-      <h1>個人頁</h1>
+      <h1>
+        個人頁
+        <Link to="/user/processing">
+          <button type="button">我的帳戶</button>
+        </Link>
+        {
+          userInfo.storeIds?.length !== 0
+            ? (
+              <Link to="/store/backstage">
+                <button type="button">我的店家</button>
+              </Link>
+            )
+            : ''
+        }
+        <button type="button" onClick={Logout}>登出</button>
+      </h1>
       <Wrapper>
         <UserInfo>
           <h2>{userInfo.user_name}</h2>
@@ -128,9 +142,7 @@ function UserPage() {
             <Button to="/user/reserve">預約中</Button>
             <Button to="/user/orders">全部訂單</Button>
           </TabBar>
-          <userContext.Provider value={userInfo}>
-            <Outlet />
-          </userContext.Provider>
+          <Outlet />
         </TabWrapper>
       </Wrapper>
     </>

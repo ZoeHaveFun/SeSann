@@ -8,7 +8,7 @@ import styled from 'styled-components/macro';
 import dayjs from 'dayjs';
 import {
   firebaseMachines, firebaseStores, firebaseProcessing, firebaseReserve, firebaseUsers,
-} from '../firestore';
+} from '../utils/firestore';
 
 const duration = require('dayjs/plugin/duration');
 
@@ -113,7 +113,7 @@ function MachineCard({ machine, handleProcessing, handleReserve }) {
 }
 
 function StorePage() {
-  const userInfo = useContext(firebaseUsers.userContext)[0];
+  const userInfo = useContext(firebaseUsers.AuthContext);
   const userId = userInfo.user_id;
   const [userReserveLists, setUserReserveLists] = useState([]);
   const storeId = useLocation().search.split('=')[1];
@@ -140,7 +140,7 @@ function StorePage() {
       return;
     }
     reserveData.category = selectMachine.categorys[categoryIndex];
-    reserveData.user_id = userId;
+    reserveData.user_id = userInfo.user_id;
     reserveData.machine_id = selectMachine.machine_id;
     reserveData.machine_name = selectMachine.machine_name;
     reserveData.store_id = selectMachine.store_id;
@@ -183,7 +183,7 @@ function StorePage() {
       return;
     }
     processingData.category = selectMachine.categorys[categoryIndex];
-    processingData.user_id = userId;
+    processingData.user_id = userInfo.user_id;
     processingData.machine_id = selectMachine.machine_id;
     processingData.machine_name = selectMachine.machine_name;
     processingData.store_id = selectMachine.store_id;
@@ -193,7 +193,7 @@ function StorePage() {
 
     firebaseProcessing.post(processingData);
     firebaseMachines.updateStatus(machineId, 1);
-    firebaseUsers.updatePointes(userId, processingData.category.price);
+    firebaseUsers.updatePointes(userInfo.user_id, userInfo.points - processingData.category.price);
 
     if (checkUserReserved.length !== 0) {
       const newReserveIds = [...selectMachine.reserveIds];

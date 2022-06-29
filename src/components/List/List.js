@@ -1,10 +1,10 @@
 import styled from 'styled-components';
 import { PropTypes } from 'prop-types';
 import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import {
   firebaseUsers, firebaseMachines, firebaseProcessing,
-} from '../../firestore';
+} from '../../utils/firestore';
 
 const duration = require('dayjs/plugin/duration');
 
@@ -42,20 +42,22 @@ export function ReserveList({ item }) {
 }
 
 export function ProcessinfList({ item }) {
+  const userInfo = useContext(firebaseUsers.AuthContext);
   const [countDown, setCountDown] = useState();
 
   useEffect(() => {
     const handleFinished = () => {
-      const ordersData = {};
+      const orderData = {};
 
-      ordersData.category = item.category;
-      ordersData.machine_id = item.machine_id;
-      ordersData.machine_name = item.machine_name;
-      ordersData.start_time = item.start_time;
-      ordersData.store_id = item.store_id;
-      ordersData.store_name = item.store_name;
+      orderData.category = item.category;
+      orderData.machine_id = item.machine_id;
+      orderData.machine_name = item.machine_name;
+      orderData.start_time = item.start_time;
+      orderData.store_id = item.store_id;
+      orderData.store_name = item.store_name;
 
-      firebaseUsers.addOrders(item.user_id, ordersData);
+      const newOrders = [...userInfo.orders, orderData];
+      firebaseUsers.addOrders(userInfo.user_id, newOrders);
       firebaseProcessing.delet(item.process_id);
       firebaseMachines.updateStatus(item.machine_id, 0);
     };
@@ -71,7 +73,7 @@ export function ProcessinfList({ item }) {
         }
       }, 1000);
     }
-  }, [item.process_id, item.end_time, item.machine_id, item]);
+  }, [item.process_id, item.end_time, item.machine_id, item, userInfo]);
 
   return (
     <Wrapper>

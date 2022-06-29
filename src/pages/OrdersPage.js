@@ -1,9 +1,9 @@
 import { useContext } from 'react';
-import { firebaseUsers } from '../firestore';
+import { firebaseUsers } from '../utils/firestore';
 import { OrderList } from '../components/List';
 
 function OrdersPage() {
-  const userInfo = useContext(firebaseUsers.userContext);
+  const userInfo = useContext(firebaseUsers.AuthContext);
   return (
     <div>
       {

@@ -1,10 +1,10 @@
 import { useEffect, useState, useContext } from 'react';
-import { firebaseProcessing, firebaseUsers } from '../firestore';
+import { firebaseProcessing, firebaseUsers } from '../utils/firestore';
 import { ProcessinfList } from '../components/List';
 
 function ProcessingPage() {
   const [process, setProcess] = useState([]);
-  const userInfo = useContext(firebaseUsers.userContext);
+  const userInfo = useContext(firebaseUsers.AuthContext);
   const userId = userInfo.user_id;
   useEffect(() => {
     // const handleProcessUpdate = (newData) => {
