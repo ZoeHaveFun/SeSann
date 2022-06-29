@@ -1,5 +1,9 @@
+/* eslint-disable no-console */
 import { initializeApp } from 'firebase/app';
-import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import {
+  createUserWithEmailAndPassword, getAuth,
+  signInWithEmailAndPassword, setPersistence, browserSessionPersistence, signOut,
+} from 'firebase/auth';
 import {
   getFirestore, setDoc, collection, getDocs, onSnapshot, doc, query, where, getDoc,
   updateDoc, deleteDoc,
@@ -8,16 +12,16 @@ import { createContext } from 'react';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_APIKEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  authDomain: 'laundry-27ace.firebaseapp.com',
   projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  storageBucket: 'laundry-27ace.appspot.com',
   messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
   measurementId: process.env.REACT_APP_FIREBASE_MEASURMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 export const firebaseUsers = {
@@ -32,10 +36,14 @@ export const firebaseUsers = {
       storeIds: [],
     });
   },
-  async login(email, password) {
-    const result = await signInWithEmailAndPassword(auth, email, password);
-    const userInfo = await firebaseUsers.get(result.user.uid);
-    return userInfo;
+  signIn(email, password) {
+    setPersistence(auth, browserSessionPersistence)
+      .then(() => signInWithEmailAndPassword(auth, email, password));
+  },
+  signOut() {
+    signOut(auth).then(() => {
+      console.log('你O U T');
+    });
   },
   onUserShot(userId, callback) {
     return onSnapshot(doc(db, this.tableName, userId), (Info) => {
@@ -48,19 +56,20 @@ export const firebaseUsers = {
     const docSnap = await getDoc(docRef);
     return docSnap.data();
   },
-  userContext: createContext({}),
-  async addOrders(Id, data) {
-    const docSnap = await getDoc(doc(db, this.tableName, Id));
-    const orderData = docSnap.data().orders;
-    orderData.push(data);
-    updateDoc(doc(db, this.tableName, Id), {
-      orders: orderData,
+  AuthContext: createContext(),
+  async addOrders(UserId, newData) {
+    updateDoc(doc(db, this.tableName, UserId), {
+      orders: newData,
     });
   },
-  async updatePointes(UserId, price) {
-    const userInfo = await firebaseUsers.get(UserId);
+  updatePointes(UserId, newPoints) {
     updateDoc(doc(db, this.tableName, UserId), {
-      points: userInfo.points - price,
+      points: newPoints,
+    });
+  },
+  updateStoreIds(UserId, newData) {
+    updateDoc(doc(db, this.tableName, UserId), {
+      storeIds: newData,
     });
   },
 };
@@ -70,6 +79,7 @@ export const firebaseStores = {
   post(postData) {
     const data = doc(collection(db, this.tableName));
     setDoc(data, { ...postData, store_id: data.id });
+    return data.id;
   },
   onStoresShot(callback) {
     return onSnapshot(collection(db, this.tableName), (data) => {
@@ -88,6 +98,11 @@ export const firebaseStores = {
     const docRef = doc(db, this.tableName, storeId);
     const docSnap = await getDoc(docRef);
     return docSnap.data();
+  },
+  async getQuery(Id, key) {
+    const q = query(collection(db, this.tableName), where(key, '==', Id));
+    const data = await getDocs(q);
+    return data.docs;
   },
 };
 

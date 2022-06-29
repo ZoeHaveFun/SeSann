@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import {
-  useEffect, useRef, useState,
+  useEffect, useState, useContext,
 } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { PropTypes } from 'prop-types';
@@ -8,107 +8,11 @@ import styled from 'styled-components/macro';
 import dayjs from 'dayjs';
 import {
   firebaseMachines, firebaseStores, firebaseProcessing, firebaseReserve, firebaseUsers,
-} from '../firestore';
+} from '../utils/firestore';
 
 const duration = require('dayjs/plugin/duration');
 
 dayjs.extend(duration);
-
-function AddMachine({ storeId }) {
-  const machineNameRef = useRef(null);
-  const machineTypeRef = useRef(null);
-  const washCategorys = [
-    {
-      name: '快洗',
-      time: 31,
-      price: 50,
-    },
-    {
-      name: '標準洗',
-      time: 35,
-      price: 60,
-    },
-    {
-      name: '柔洗',
-      time: 41,
-      price: 70,
-    },
-  ];
-  const dryCategorys = [
-    {
-      name: '微微烘',
-      time: 30,
-      price: 50,
-    },
-    {
-      name: '標準烘',
-      time: 36,
-      price: 60,
-    },
-    {
-      name: '超級烘',
-      time: 42,
-      price: 70,
-    },
-  ];
-  const petCategorys = [
-    {
-      name: '髒',
-      time: 30,
-      price: 60,
-    },
-    {
-      name: '很髒',
-      time: 36,
-      price: 70,
-    },
-    {
-      name: '超級髒',
-      time: 42,
-      price: 80,
-    },
-  ];
-  const handlePostMachine = () => {
-    if (!machineNameRef.current.value || !machineTypeRef.current.value) return;
-    const postData = {
-      status: 0,
-    };
-    postData.machine_name = machineNameRef.current.value;
-    postData.type = machineTypeRef.current.value;
-    postData.store_id = storeId;
-    if (postData.type === 'wash') {
-      postData.categorys = washCategorys;
-    } else if (postData.type === 'dry') {
-      postData.categorys = dryCategorys;
-    } else { postData.categorys = petCategorys; }
-
-    machineNameRef.current.value = '';
-    machineTypeRef.current.value = '';
-
-    firebaseMachines.post(postData);
-  };
-  return (
-    <div>
-      <h3>新增機台</h3>
-      <ul>
-        <li>
-          機台名稱:
-          <input type="text" ref={machineNameRef} />
-        </li>
-        <li>
-          類型:
-          <select ref={machineTypeRef}>
-            <option value="">選擇機台類型</option>
-            <option value="wash">洗衣</option>
-            <option value="dry">烘衣</option>
-            <option value="pet">寵物專用</option>
-          </select>
-        </li>
-      </ul>
-      <button type="button" onClick={handlePostMachine}>新增</button>
-    </div>
-  );
-}
 
 const MachineWrapper = styled.div`
   display: flex;
@@ -209,7 +113,8 @@ function MachineCard({ machine, handleProcessing, handleReserve }) {
 }
 
 function StorePage() {
-  const [userId] = useState(localStorage.getItem('userId'));
+  const userInfo = useContext(firebaseUsers.AuthContext);
+  const userId = userInfo.user_id;
   const [userReserveLists, setUserReserveLists] = useState([]);
   const storeId = useLocation().search.split('=')[1];
   const [storeInfo, setStoreInfo] = useState({});
@@ -235,7 +140,7 @@ function StorePage() {
       return;
     }
     reserveData.category = selectMachine.categorys[categoryIndex];
-    reserveData.user_id = 'mVJla3AyVysvFzWzUSG5';
+    reserveData.user_id = userInfo.user_id;
     reserveData.machine_id = selectMachine.machine_id;
     reserveData.machine_name = selectMachine.machine_name;
     reserveData.store_id = selectMachine.store_id;
@@ -271,14 +176,14 @@ function StorePage() {
     const checkUserReserved = userReserveLists.filter(
       (item) => item.reserve_id === selectMachine.reserveIds[0],
     );
-
     if (selectMachine.reserveIds[0] !== undefined
           && checkUserReserved.length === 0
     ) {
       console.log('你不是下一位餒 乖乖排隊');
+      return;
     }
     processingData.category = selectMachine.categorys[categoryIndex];
-    processingData.user_id = 'mVJla3AyVysvFzWzUSG5';
+    processingData.user_id = userInfo.user_id;
     processingData.machine_id = selectMachine.machine_id;
     processingData.machine_name = selectMachine.machine_name;
     processingData.store_id = selectMachine.store_id;
@@ -288,7 +193,7 @@ function StorePage() {
 
     firebaseProcessing.post(processingData);
     firebaseMachines.updateStatus(machineId, 1);
-    firebaseUsers.updatePointes(userId, processingData.category.price);
+    firebaseUsers.updatePointes(userInfo.user_id, userInfo.points - processingData.category.price);
 
     if (checkUserReserved.length !== 0) {
       const newReserveIds = [...selectMachine.reserveIds];
@@ -322,7 +227,6 @@ function StorePage() {
       <div>
         <h5>{`${storeInfo.store_name} ${storeInfo.address} ${storeInfo.phone}`}</h5>
       </div>
-      <AddMachine storeId={storeId} />
       <div>
         <h3>全部機台</h3>
         {machines.map((item) => (
@@ -355,7 +259,4 @@ MachineCard.propTypes = {
   }).isRequired,
   handleProcessing: PropTypes.func.isRequired,
   handleReserve: PropTypes.func.isRequired,
-};
-AddMachine.propTypes = {
-  storeId: PropTypes.string.isRequired,
 };
