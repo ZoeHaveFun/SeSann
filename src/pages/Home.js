@@ -1,9 +1,10 @@
-/* eslint-disable no-unused-vars */
-import { useEffect, useRef, useState } from 'react';
+import {
+  useEffect, useRef, useState, useContext,
+} from 'react';
 import { Link } from 'react-router-dom';
 import { PropTypes } from 'prop-types';
 import styled from 'styled-components/macro';
-import { firebaseStores, firebaseUsers } from '../firestore';
+import { firebaseStores, firebaseUsers } from '../utils/firestore';
 
 const StoreCard = styled.div`
   padding: 10px 20px;
@@ -54,35 +55,6 @@ function RegisterForm() {
   );
 }
 
-function LoginForm() {
-  const loginEmail = useRef();
-  const loginPassword = useRef();
-
-  const postLogin = () => {
-    const userInfo = firebaseUsers.login(
-      loginEmail.current.value,
-      loginPassword.current.value,
-    );
-
-    loginEmail.current.value = '';
-    loginPassword.current.value = '';
-  };
-  return (
-    <div>
-      <h2>會員登入</h2>
-      <label htmlFor="loginEmail">
-        Email
-        <input type="email" name="loginEmail" placeholder="輸入email" ref={loginEmail} />
-      </label>
-      <label htmlFor="loginPassword">
-        密碼
-        <input type="password" name="loginPassword" placeholder="輸入密碼" ref={loginPassword} />
-      </label>
-      <button type="button" onClick={postLogin}>登入</button>
-    </div>
-  );
-}
-
 function Store({ item }) {
   return (
     <StoreCard>
@@ -104,17 +76,27 @@ Store.propTypes = {
   }).isRequired,
 };
 
-function AllStoresPage() {
+function Home() {
+  const userInfo = useContext(firebaseUsers.AuthContext);
   const [stores, setStores] = useState([]);
   const storeNameRef = useRef(null);
   const storeAddressRef = useRef(null);
   const storePhoneRef = useRef(null);
+
   const handlePostStore = () => {
+    if (!userInfo.user_id) {
+      window.location.href = './login';
+    }
+
     const postData = {};
     postData.address = storeAddressRef.current.value;
     postData.store_name = storeNameRef.current.value;
     postData.phone = storePhoneRef.current.value;
-    firebaseStores.post(postData);
+    postData.user_id = userInfo.user_id;
+
+    const storeId = firebaseStores.post(postData);
+    const newStoreIds = [...userInfo.storeIds, storeId];
+    firebaseUsers.updateStoreIds(userInfo.user_id, newStoreIds);
 
     storeAddressRef.current.value = '';
     storeNameRef.current.value = '';
@@ -126,39 +108,51 @@ function AllStoresPage() {
     };
     return firebaseStores.onStoresShot(handleStoresUpdate);
   }, []);
-  useEffect(() => {
-    const userId = 'mVJla3AyVysvFzWzUSG5';
-    window.localStorage.setItem('userId', userId);
-  }, []);
   return (
     <div>
-      <Link to="/user/processing">我的帳戶</Link>
+      {
+        !userInfo
+          ? (
+            <Link to="/login">
+              <button type="button">登入</button>
+            </Link>
+          )
+          : (
+            <>
+              <span>{`哈囉! ${userInfo.user_name}`}</span>
+              <Link to="/user/processing">我的帳戶</Link>
+            </>
+          )
+      }
       <RegisterForm />
-      <LoginForm />
-      <ul>
-        <li>
-          <span>店家名稱</span>
-          <input type="text" ref={storeNameRef} />
-        </li>
-        <li>
-          <span>店家地址</span>
-          <input type="text" ref={storeAddressRef} />
-        </li>
-        <li>
-          <span>電話</span>
-          <input type="text" ref={storePhoneRef} />
-        </li>
-        <li>
-          <button type="submit" onClick={handlePostStore}>入駐店家</button>
-        </li>
-      </ul>
+
+      <div>
+        <h2>店家入駐</h2>
+        <label htmlFor="storeName">
+          店家名稱
+          <input type="text" name="storeName" placeholder="妳的店名..." ref={storeNameRef} />
+        </label>
+        <label htmlFor="storeAddress">
+          店家地址
+          <input type="text" name="storeAddress" placeholder="店在哪裡..." ref={storeAddressRef} />
+        </label>
+        <label htmlFor="storePhone">
+          電話
+          <input type="text" name="storePhone" placeholder="連絡電話..." ref={storePhoneRef} />
+        </label>
+        <button type="submit" onClick={handlePostStore}>入駐店家</button>
+      </div>
+
       <div>
         {
           stores.map((item) => <Store item={item} key={item.store_id} />)
         }
       </div>
+      <div>
+        <h2>找一找</h2>
+      </div>
     </div>
   );
 }
 
-export default AllStoresPage;
+export default Home;
