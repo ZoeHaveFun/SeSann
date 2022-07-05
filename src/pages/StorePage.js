@@ -2,18 +2,22 @@
 import {
   useEffect, useState, useContext,
 } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { PropTypes } from 'prop-types';
 import styled from 'styled-components/macro';
 import dayjs from 'dayjs';
 import {
   firebaseMachines, firebaseStores, firebaseProcessing, firebaseReserve, firebaseUsers,
 } from '../utils/firestore';
+import Header from '../components/Header';
 
 const duration = require('dayjs/plugin/duration');
 
 dayjs.extend(duration);
 
+const Wrapper = styled.div`
+  padding-top: 80px;
+`;
 const MachineWrapper = styled.div`
   display: flex;
   padding: 10px 20px;
@@ -22,6 +26,7 @@ const MachineWrapper = styled.div`
   align-items: center;
 `;
 const Button = styled.button`
+  border: 1px #001c55 solid;
   border-radius: 0.5rem;
   cursor: ${(props) => (props.isProcessing || props.notAllow ? 'not-allowed' : 'pointer')};
   &:hover{
@@ -114,7 +119,6 @@ function MachineCard({ machine, handleProcessing, handleReserve }) {
 
 function StorePage() {
   const userInfo = useContext(firebaseUsers.AuthContext);
-  const userId = userInfo.user_id;
   const [userReserveLists, setUserReserveLists] = useState([]);
   const storeId = useLocation().search.split('=')[1];
   const [storeInfo, setStoreInfo] = useState({});
@@ -217,27 +221,29 @@ function StorePage() {
     const handleUserReserve = (newData) => {
       setUserReserveLists(newData);
     };
-    return firebaseReserve.onReserveShot(userId, 'user_id', handleUserReserve);
-  }, [userId]);
+    return firebaseReserve.onReserveShot(userInfo.user_id, 'user_id', handleUserReserve);
+  }, [userInfo.user_id]);
 
   return (
     <>
-      <Link to="/">回到首頁</Link>
-      <h1>店家主頁</h1>
-      <div>
-        <h5>{`${storeInfo.store_name} ${storeInfo.address} ${storeInfo.phone}`}</h5>
-      </div>
-      <div>
-        <h3>全部機台</h3>
-        {machines.map((item) => (
-          <MachineCard
-            machine={item}
-            key={item.machine_id}
-            handleProcessing={handleProcessing}
-            handleReserve={handleReserve}
-          />
-        ))}
-      </div>
+      <Header />
+      <Wrapper>
+        <h1>店家主頁</h1>
+        <div>
+          <h5>{`${storeInfo.store_name} ${storeInfo.address} ${storeInfo.phone}`}</h5>
+        </div>
+        <div>
+          <h3>全部機台</h3>
+          {machines.map((item) => (
+            <MachineCard
+              machine={item}
+              key={item.machine_id}
+              handleProcessing={handleProcessing}
+              handleReserve={handleReserve}
+            />
+          ))}
+        </div>
+      </Wrapper>
     </>
   );
 }
