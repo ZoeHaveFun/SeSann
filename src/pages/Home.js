@@ -1,10 +1,16 @@
 import {
-  useEffect, useRef, useState, useContext,
+  useEffect, useRef, useState,
 } from 'react';
 import { Link } from 'react-router-dom';
+import { FullPage, Slide } from 'react-full-page';
 import { PropTypes } from 'prop-types';
 import styled from 'styled-components/macro';
 import { firebaseStores, firebaseUsers } from '../utils/firestore';
+import LaundryMap from '../components/laundryMap';
+import StoreJoinForm from '../components/StoreJoinForm';
+import Header from '../components/Header';
+import { SectionA, SectionB, SectionC } from '../components/Section';
+import doLaundry from '../style/imgs/doLaundry.jpg';
 
 const StoreCard = styled.div`
   padding: 10px 20px;
@@ -19,7 +25,7 @@ const StoreCard = styled.div`
   }
 `;
 
-function RegisterForm() {
+function UserRegisterForm() {
   const registerName = useRef();
   const registerEmail = useRef();
   const registerPassword = useRef();
@@ -36,7 +42,7 @@ function RegisterForm() {
     registerPassword.current.value = '';
   };
   return (
-    <div>
+    <div style={{ backgroundColor: '#ffbf69', height: '100vh' }}>
       <h2>會員註冊</h2>
       <label htmlFor="registerName">
         名稱
@@ -55,6 +61,20 @@ function RegisterForm() {
   );
 }
 
+const Banner = styled.div`
+  padding-top: 80px;
+  background-image: url(${(props) => props.img});
+  background-position: center;
+  background-size: contain;
+  /* background-repeat: no-repeat; */
+  height: calc(100%);
+`;
+
+function FirstBanner() {
+  return (
+    <Banner img={doLaundry} />
+  );
+}
 function Store({ item }) {
   return (
     <StoreCard>
@@ -77,31 +97,13 @@ Store.propTypes = {
 };
 
 function Home() {
-  const userInfo = useContext(firebaseUsers.AuthContext);
   const [stores, setStores] = useState([]);
-  const storeNameRef = useRef(null);
-  const storeAddressRef = useRef(null);
-  const storePhoneRef = useRef(null);
-
-  const handlePostStore = () => {
-    if (!userInfo.user_id) {
-      window.location.href = './login';
-    }
-
-    const postData = {};
-    postData.address = storeAddressRef.current.value;
-    postData.store_name = storeNameRef.current.value;
-    postData.phone = storePhoneRef.current.value;
-    postData.user_id = userInfo.user_id;
-
-    const storeId = firebaseStores.post(postData);
-    const newStoreIds = [...userInfo.storeIds, storeId];
-    firebaseUsers.updateStoreIds(userInfo.user_id, newStoreIds);
-
-    storeAddressRef.current.value = '';
-    storeNameRef.current.value = '';
-    storePhoneRef.current.value = '';
-  };
+  const laundryMapRef = useRef(null);
+  // const toLaundryMap = () => {
+  //   console.log(laundryMapRef);
+  //   laundryMapRef.scrollIntoView();
+  //   // window.scrollTo(0, laundryMapRef.current.offsetTop);
+  // };
   useEffect(() => {
     const handleStoresUpdate = (newData) => {
       setStores(newData);
@@ -109,49 +111,41 @@ function Home() {
     return firebaseStores.onStoresShot(handleStoresUpdate);
   }, []);
   return (
-    <div>
-      {
-        !userInfo
-          ? (
-            <Link to="/login">
-              <button type="button">登入</button>
-            </Link>
-          )
-          : (
-            <>
-              <span>{`哈囉! ${userInfo.user_name}`}</span>
-              <Link to="/user/processing">我的帳戶</Link>
-            </>
-          )
-      }
-      <RegisterForm />
+    <>
+      <Header />
+      <FullPage>
+        <Slide>
+          <FirstBanner />
+        </Slide>
+        <Slide>
+          <SectionA />
+        </Slide>
+        <Slide>
+          <SectionB />
+        </Slide>
+        <Slide>
+          <SectionC />
+        </Slide>
+        <Slide>
+          <div ref={laundryMapRef} />
+          <LaundryMap />
+        </Slide>
+        <Slide>
+          <div style={{ padding: '20px' }}>
+            {
+            stores?.map((item) => <Store item={item} key={item.store_id} />)
+          }
+          </div>
+        </Slide>
+        <Slide>
+          <UserRegisterForm />
+        </Slide>
+        <Slide>
+          <StoreJoinForm />
+        </Slide>
+      </FullPage>
 
-      <div>
-        <h2>店家入駐</h2>
-        <label htmlFor="storeName">
-          店家名稱
-          <input type="text" name="storeName" placeholder="妳的店名..." ref={storeNameRef} />
-        </label>
-        <label htmlFor="storeAddress">
-          店家地址
-          <input type="text" name="storeAddress" placeholder="店在哪裡..." ref={storeAddressRef} />
-        </label>
-        <label htmlFor="storePhone">
-          電話
-          <input type="text" name="storePhone" placeholder="連絡電話..." ref={storePhoneRef} />
-        </label>
-        <button type="submit" onClick={handlePostStore}>入駐店家</button>
-      </div>
-
-      <div>
-        {
-          stores.map((item) => <Store item={item} key={item.store_id} />)
-        }
-      </div>
-      <div>
-        <h2>找一找</h2>
-      </div>
-    </div>
+    </>
   );
 }
 
