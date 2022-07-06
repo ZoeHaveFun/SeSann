@@ -1,12 +1,18 @@
+/* eslint-disable react/no-array-index-key */
 import {
   useEffect, useContext, useState,
 } from 'react';
 import { PropTypes } from 'prop-types';
 import styled from 'styled-components/macro';
 import axios from 'axios';
+import dayjs from 'dayjs';
 import { firebaseStores, firebaseUsers, firebaseMachines } from '../utils/firestore';
 import Header from '../components/Header';
 import AddMachineForm from '../components/AddMachineForm';
+
+const duration = require('dayjs/plugin/duration');
+
+dayjs.extend(duration);
 
 const Wrapper = styled.div`
   padding-top: 80px;
@@ -104,7 +110,7 @@ function MachineCard({ machine }) {
       <CategoryWrapper>
         {
           categorys.map((category, index) => (
-            <Category key={category.price}>
+            <Category key={index}>
               <label htmlFor="name">
                 <input type="text" name="name" value={category.name} disabled={!edit} onChange={(e) => { handleCategoryChange(e, index); }} />
               </label>
@@ -137,7 +143,6 @@ function Backstage() {
   const [edit, setEdit] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const geoKey = 'AIzaSyAKvX91_wrPBCvJUcPDFCVF18upOWq7GdM';
-
   const handleMachinessUpdate = (newData) => {
     setMachines(newData);
   };
@@ -160,8 +165,11 @@ function Backstage() {
             return;
           }
           setErrorMessage('');
+          const addressComponents = res.data.results[0].address_components;
           newData.address = res.data.results[0].formatted_address;
           newData.location = res.data.results[0].geometry.location;
+          newData.city = addressComponents[addressComponents.length - 3].long_name;
+          newData.districts = addressComponents[addressComponents.length - 4].long_name;
           setStoreData(newData);
         });
     }
@@ -178,7 +186,28 @@ function Backstage() {
     firebaseStores.updateData(storeData.store_id, storeData);
     setEdit(!edit);
   };
-
+  const handleCustomerRecord = (days) => {
+    let customer;
+    if (days === undefined) {
+      customer = storeData.order_record.length;
+    }
+    if (days === 1) {
+      const toddayRecord = storeData.order_record.filter((record) => dayjs(record.start_time.seconds * 1000).format('YYYYMMDD') === dayjs().format('YYYYMMDD'));
+      customer = toddayRecord.length;
+    }
+    return customer;
+  };
+  const handleIncomeRecord = (days) => {
+    let income;
+    if (days === undefined) {
+      income = storeData.order_record.reduce((accu, curr) => accu + curr.category.price, 0);
+    }
+    if (days === 1) {
+      const toddayRecord = storeData.order_record.filter((record) => dayjs(record.start_time.seconds * 1000).format('YYYYMMDD') === dayjs().format('YYYYMMDD'));
+      income = toddayRecord.reduce((accu, curr) => accu + curr.category.price, 0);
+    }
+    return income;
+  };
   useEffect(() => {
     firebaseStores.getQuery(userId, 'user_id')
       .then((res) => res.map((docc) => docc.data()))
@@ -201,18 +230,38 @@ function Backstage() {
           </select>
           {
             storeData ? (
-              <div>
-                <label htmlFor="address">
-                  地址:
-                  <input type="text" name="address" value={storeData.address} disabled={!edit} onChange={(e) => { changeStoreData(e); }} />
-                </label>
-                <p>{errorMessage}</p>
-                <label htmlFor="phone">
-                  連絡電話:
-                  <input type="text" name="phone" value={storeData.phone} disabled={!edit} onChange={(e) => { changeStoreData(e); }} />
-                </label>
-                <button type="button" onClick={() => { handleStoreEdit(); }}>{edit ? '完成' : '編輯'}</button>
-              </div>
+              <>
+                <div>
+                  <label htmlFor="address">
+                    地址:
+                    <input type="text" name="address" value={storeData.address} disabled={!edit} onChange={(e) => { changeStoreData(e); }} />
+                  </label>
+                  <p>{errorMessage}</p>
+                  <label htmlFor="phone">
+                    連絡電話:
+                    <input type="text" name="phone" value={storeData.phone} disabled={!edit} onChange={(e) => { changeStoreData(e); }} />
+                  </label>
+                  <button type="button" onClick={() => { handleStoreEdit(); }}>{edit ? '完成' : '編輯'}</button>
+                </div>
+                <div>
+                  <span>
+                    今日來客數:
+                    {handleCustomerRecord(1)}
+                  </span>
+                  <span>
+                    今日營業額:
+                    {handleIncomeRecord(1)}
+                  </span>
+                  <span>
+                    累積來客數:
+                    {handleCustomerRecord()}
+                  </span>
+                  <span>
+                    累積營業額:
+                    {handleIncomeRecord()}
+                  </span>
+                </div>
+              </>
             ) : ''
           }
 
