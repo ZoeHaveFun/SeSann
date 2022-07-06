@@ -1,9 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import styled from 'styled-components';
 import { PropTypes } from 'prop-types';
 import dayjs from 'dayjs';
 import { useEffect, useState, useContext } from 'react';
 import {
-  firebaseUsers, firebaseMachines, firebaseProcessing,
+  firebaseUsers, firebaseMachines, firebaseProcessing, firebaseStores,
 } from '../../utils/firestore';
 
 const duration = require('dayjs/plugin/duration');
@@ -46,7 +47,12 @@ export function ProcessinfList({ item }) {
   const [countDown, setCountDown] = useState();
 
   useEffect(() => {
-    const handleFinished = () => {
+    const finishedInStore = (orderData) => {
+      const newRecord = { ...orderData };
+      newRecord.user_id = userInfo.user_id;
+      firebaseStores.updateOrderRecord(newRecord.store_id, newRecord);
+    };
+    const finishedInUser = () => {
       const orderData = {};
 
       orderData.category = item.category;
@@ -57,6 +63,7 @@ export function ProcessinfList({ item }) {
       orderData.store_name = item.store_name;
 
       const newOrders = [...userInfo.orders, orderData];
+      finishedInStore(orderData);
       firebaseUsers.addOrders(userInfo.user_id, newOrders);
       firebaseProcessing.delet(item.process_id);
       firebaseMachines.updateStatus(item.machine_id, 0);
@@ -67,13 +74,13 @@ export function ProcessinfList({ item }) {
         const timeLeft = dayjs.duration(endTimer.diff(dayjs())).$d;
         if (timeLeft.minutes < 1 && timeLeft.seconds < 1) {
           clearInterval(handleCountDown);
-          handleFinished();
+          finishedInUser();
         } else {
           setCountDown(`${timeLeft.minutes} : ${timeLeft.seconds}`);
         }
       }, 1000);
     }
-  }, [item.process_id, item.end_time, item.machine_id, item, userInfo]);
+  }, [item.end_time, item.machine_id]);
 
   return (
     <Wrapper>
