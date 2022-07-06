@@ -116,15 +116,6 @@ function UserPage() {
       <Header />
       <Wrapper>
         <Title>我的帳戶</Title>
-        {/* {
-          userInfo.storeIds?.length !== 0
-            ? (
-              <Link to="/store/backstage">
-                <button type="button">我的店家</button>
-              </Link>
-            )
-            : ''
-        } */}
         <UserInfoWrapper>
           <UserInfo>
             <h2>{userInfo.user_name}</h2>
