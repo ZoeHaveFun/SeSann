@@ -1,6 +1,7 @@
 import { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components/macro';
+import { PropTypes } from 'prop-types';
 import {
   Menu, QrCode, LocalLaundryService, Map,
 } from '@styled-icons/material-rounded';
@@ -10,7 +11,7 @@ import userImgDefault from '../../style/imgs/userImgDefault.jpg';
 
 const HeaderWrapper = styled.div`
   z-index: 10;
-  position: absolute;
+  position: fixed;
   top: 0;
   width: 100%;
   display: flex;
@@ -122,7 +123,8 @@ const UserImg = styled.img`
   width: 30px;
 `;
 
-function Header() {
+function Header({ getCurrentSlideIndex, scrollToSlide }) {
+  const currentSlideIndex = getCurrentSlideIndex();
   const userInfo = useContext(firebaseUsers.AuthContext);
   const [menuOpen, serMenuOpen] = useState(false);
   const navegate = useNavigate();
@@ -130,6 +132,11 @@ function Header() {
     firebaseUsers.signOut();
     navegate('/', { replace: true });
   };
+  const onClickMenu = (e) => {
+    const key = Number(e.target.attributes[1].value);
+    scrollToSlide(key - 1);
+  };
+
   return (
     <HeaderWrapper>
       <Link to="/">
@@ -139,9 +146,9 @@ function Header() {
         </Logo>
       </Link>
 
-      <Nav>
-        <NavBtn type="button">關於Mr.Raccoon</NavBtn>
-        <NavBtn type="button">
+      <Nav selectedKeys={[`${currentSlideIndex + 1}`]} onClick={(e) => { onClickMenu(e); }}>
+        <NavBtn type="button" data-key="2">關於Mr.Raccoon</NavBtn>
+        <NavBtn type="button" data-key="5">
           找一找
           <Icon><Map /></Icon>
         </NavBtn>
@@ -149,46 +156,50 @@ function Header() {
           掃一掃
           <Icon><QrCode /></Icon>
         </NavBtn>
-        <NavBtn type="button">
+        <NavBtn type="button" data-key="7">
           我要加入
           <Icon><LocalLaundryService /></Icon>
         </NavBtn>
         {
-            !userInfo
-              ? (
-                <Link to="/login">
-                  <Login>Login</Login>
-                </Link>
-              )
-              : (
-                <BurgerWarpper>
-                  <MenuIcon onClick={() => serMenuOpen(!menuOpen)} click={menuOpen} />
-                  <MenuWrapper open={menuOpen}>
-                    <Link to="/user/processing"><span>進行中</span></Link>
-                    <Link to="/user/reserve"><span>預約中</span></Link>
-                    <Link to="/user/orders"><span>全部訂單</span></Link>
-                    <br />
-                    <Link to="/user">
-                      <span>我的帳戶</span>
-                    </Link>
-                    {
-                      userInfo.storeIds?.length !== 0
-                        ? (
-                          <Link to="/store/backstage">
-                            <span>我的店家</span>
-                          </Link>
-                        ) : ('')
-                    }
-                    <button type="button" onClick={Logout}>登出</button>
-                  </MenuWrapper>
-                  <UserImg src={userImgDefault} />
-                </BurgerWarpper>
-              )
-
-          }
+          !userInfo
+            ? (
+              <Link to="/login">
+                <Login>Login</Login>
+              </Link>
+            )
+            : (
+              <BurgerWarpper>
+                <MenuIcon onClick={() => serMenuOpen(!menuOpen)} click={menuOpen} />
+                <MenuWrapper open={menuOpen}>
+                  <Link to="/user/processing"><span>進行中</span></Link>
+                  <Link to="/user/reserve"><span>預約中</span></Link>
+                  <Link to="/user/orders"><span>全部訂單</span></Link>
+                  <br />
+                  <Link to="/user">
+                    <span>我的帳戶</span>
+                  </Link>
+                  {
+                    userInfo.storeIds?.length !== 0
+                      ? (
+                        <Link to="/store/backstage">
+                          <span>我的店家</span>
+                        </Link>
+                      ) : ('')
+                  }
+                  <button type="button" onClick={Logout}>登出</button>
+                </MenuWrapper>
+                <UserImg src={userImgDefault} />
+              </BurgerWarpper>
+            )
+        }
       </Nav>
     </HeaderWrapper>
   );
 }
 
 export default Header;
+
+Header.propTypes = {
+  getCurrentSlideIndex: PropTypes.func.isRequired,
+  scrollToSlide: PropTypes.func.isRequired,
+};
