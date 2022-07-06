@@ -16,51 +16,51 @@ function AddMachineForm({ storeId }) {
   const washCategorys = [
     {
       name: '快洗',
-      time: 31,
+      time: 0.5,
       price: 50,
     },
     {
       name: '標準洗',
-      time: 35,
+      time: 1,
       price: 60,
     },
     {
       name: '柔洗',
-      time: 41,
+      time: 1,
       price: 70,
     },
   ];
   const dryCategorys = [
     {
       name: '微微烘',
-      time: 30,
+      time: 0.5,
       price: 50,
     },
     {
       name: '標準烘',
-      time: 36,
+      time: 1,
       price: 60,
     },
     {
       name: '超級烘',
-      time: 42,
+      time: 1,
       price: 70,
     },
   ];
   const petCategorys = [
     {
       name: '髒',
-      time: 30,
+      time: 0.5,
       price: 60,
     },
     {
       name: '很髒',
-      time: 36,
+      time: 1,
       price: 70,
     },
     {
       name: '超級髒',
-      time: 42,
+      time: 1,
       price: 80,
     },
   ];
