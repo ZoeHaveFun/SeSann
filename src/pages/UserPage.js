@@ -4,7 +4,7 @@ import { PropTypes } from 'prop-types';
 import styled from 'styled-components/macro';
 import dayjs from 'dayjs';
 import { firebaseUsers, firebaseReserve } from '../utils/firestore';
-import Header from '../components/Header';
+import { Header } from '../components/Header';
 
 const duration = require('dayjs/plugin/duration');
 

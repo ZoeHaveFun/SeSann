@@ -7,7 +7,7 @@ import styled from 'styled-components/macro';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import { firebaseStores, firebaseUsers, firebaseMachines } from '../utils/firestore';
-import Header from '../components/Header';
+import { Header } from '../components/Header';
 import AddMachineForm from '../components/AddMachineForm';
 
 const duration = require('dayjs/plugin/duration');

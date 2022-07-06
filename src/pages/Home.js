@@ -10,7 +10,7 @@ import { firebaseStores } from '../utils/firestore';
 import LaundryMap from '../components/laundryMap';
 import StoreJoinForm from '../components/StoreJoinForm';
 import UserRegisterForm from '../components/UserRegisterForm';
-import Header from '../components/Header';
+import { HomeHeader } from '../components/Header';
 import {
   FirstBanner, SectionA, SectionB, SectionC,
 } from '../components/Section';
@@ -57,7 +57,7 @@ function Home() {
     return firebaseStores.onStoresShot(handleStoresUpdate);
   }, []);
   return (
-    <FullPage duration={400} controls={Header}>
+    <FullPage duration={400} controls={HomeHeader}>
       <Slide>
         <FirstBanner />
       </Slide>

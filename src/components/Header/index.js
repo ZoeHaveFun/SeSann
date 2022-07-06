@@ -123,7 +123,76 @@ const UserImg = styled.img`
   width: 30px;
 `;
 
-function Header({ getCurrentSlideIndex, scrollToSlide }) {
+function Header() {
+  const userInfo = useContext(firebaseUsers.AuthContext);
+  const [menuOpen, serMenuOpen] = useState(false);
+  const navegate = useNavigate();
+  const Logout = () => {
+    firebaseUsers.signOut();
+    navegate('/', { replace: true });
+  };
+
+  return (
+    <HeaderWrapper>
+      <Link to="/">
+        <Logo>
+          <img alt="logo" src={logo} />
+          Mr. Raccoon
+        </Logo>
+      </Link>
+
+      <Nav>
+        <NavBtn type="button">關於Mr.Raccoon</NavBtn>
+        <NavBtn type="button">
+          找一找
+          <Icon><Map /></Icon>
+        </NavBtn>
+        <NavBtn type="button">
+          掃一掃
+          <Icon><QrCode /></Icon>
+        </NavBtn>
+        <NavBtn type="button">
+          我要加入
+          <Icon><LocalLaundryService /></Icon>
+        </NavBtn>
+        {
+          !userInfo
+            ? (
+              <Link to="/login">
+                <Login>Login</Login>
+              </Link>
+            )
+            : (
+              <BurgerWarpper>
+                <MenuIcon onClick={() => serMenuOpen(!menuOpen)} click={menuOpen} />
+                <MenuWrapper open={menuOpen}>
+                  <Link to="/user/processing"><span>進行中</span></Link>
+                  <Link to="/user/reserve"><span>預約中</span></Link>
+                  <Link to="/user/orders"><span>全部訂單</span></Link>
+                  <br />
+                  <Link to="/user">
+                    <span>我的帳戶</span>
+                  </Link>
+                  {
+                    userInfo.storeIds?.length !== 0
+                      ? (
+                        <Link to="/store/backstage">
+                          <span>我的店家</span>
+                        </Link>
+                      ) : ('')
+                  }
+                  <button type="button" onClick={Logout}>登出</button>
+                </MenuWrapper>
+                <UserImg src={userImgDefault} />
+              </BurgerWarpper>
+            )
+        }
+      </Nav>
+    </HeaderWrapper>
+  );
+}
+
+function HomeHeader({ getCurrentSlideIndex, scrollToSlide }) {
   const currentSlideIndex = getCurrentSlideIndex();
   const userInfo = useContext(firebaseUsers.AuthContext);
   const [menuOpen, serMenuOpen] = useState(false);
@@ -197,9 +266,9 @@ function Header({ getCurrentSlideIndex, scrollToSlide }) {
   );
 }
 
-export default Header;
+export { HomeHeader, Header };
 
-Header.propTypes = {
+HomeHeader.propTypes = {
   getCurrentSlideIndex: PropTypes.func.isRequired,
   scrollToSlide: PropTypes.func.isRequired,
 };

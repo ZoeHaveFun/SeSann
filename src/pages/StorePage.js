@@ -9,7 +9,7 @@ import dayjs from 'dayjs';
 import {
   firebaseMachines, firebaseStores, firebaseProcessing, firebaseReserve, firebaseUsers,
 } from '../utils/firestore';
-import Header from '../components/Header';
+import { Header } from '../components/Header';
 
 const duration = require('dayjs/plugin/duration');
 
