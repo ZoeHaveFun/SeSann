@@ -37,8 +37,12 @@ export const firebaseUsers = {
     });
   },
   signIn(email, password) {
-    setPersistence(auth, browserSessionPersistence)
-      .then(() => signInWithEmailAndPassword(auth, email, password));
+    return setPersistence(auth, browserSessionPersistence)
+      .then(() => signInWithEmailAndPassword(auth, email, password))
+      .catch(async (error) => {
+        const errorMessage = await error.message;
+        return errorMessage;
+      });
   },
   signOut() {
     signOut(auth).then(() => {
@@ -104,6 +108,19 @@ export const firebaseStores = {
     const data = await getDocs(q);
     return data.docs;
   },
+  updateData(StoreId, data) {
+    updateDoc(doc(db, this.tableName, StoreId), data);
+  },
+  async updateOrderRecord(StoreId, data) {
+    const storeInfo = await firebaseStores.getOne(StoreId);
+    const newData = [...storeInfo.order_record];
+    console.log(newData);
+    newData.push(data);
+    console.log(newData);
+    updateDoc(doc(db, this.tableName, StoreId), {
+      order_record: newData,
+    });
+  },
 };
 
 export const firebaseMachines = {
@@ -136,6 +153,12 @@ export const firebaseMachines = {
     updateDoc(doc(db, this.tableName, MachineId), {
       reserveIds: data,
     });
+  },
+  updateData(MachineId, data) {
+    updateDoc(doc(db, this.tableName, MachineId), data);
+  },
+  async delet(Id) {
+    await deleteDoc(doc(db, this.tableName, Id));
   },
 };
 

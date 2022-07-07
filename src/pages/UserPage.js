@@ -1,15 +1,24 @@
 import { useEffect, useState, useContext } from 'react';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import { PropTypes } from 'prop-types';
 import styled from 'styled-components/macro';
 import dayjs from 'dayjs';
 import { firebaseUsers, firebaseReserve } from '../utils/firestore';
+import { Header } from '../components/Header';
 
 const duration = require('dayjs/plugin/duration');
 
 dayjs.extend(duration);
 
 const Wrapper = styled.div`
+  padding-top: 80px;
+`;
+const Title = styled.h1`
+  color: #001c55;
+  margin: 30px 10px 20px 10px;
+  border-bottom: 1px #001c55 solid;
+`;
+const UserInfoWrapper = styled.div`
   display: flex;
   height: 50vh;
 `;
@@ -87,12 +96,7 @@ function UserPage() {
   const [reminds, setReminds] = useState([]);
   const userInfo = useContext(firebaseUsers.AuthContext);
   const userId = userInfo.user_id;
-  const navegate = useNavigate();
 
-  const Logout = () => {
-    firebaseUsers.signOut();
-    navegate('/', { replace: true });
-  };
   useEffect(() => {
     firebaseReserve.getQuery(userId, 'user_id')
       .then((res) => res.map((item) => item.data()))
@@ -109,42 +113,30 @@ function UserPage() {
 
   return (
     <>
-      <Link to="/">回到首頁</Link>
-      <h1>
-        個人頁
-        <Link to="/user/processing">
-          <button type="button">我的帳戶</button>
-        </Link>
-        {
-          userInfo.storeIds?.length !== 0
-            ? (
-              <Link to="/store/backstage">
-                <button type="button">我的店家</button>
-              </Link>
-            )
-            : ''
-        }
-        <button type="button" onClick={Logout}>登出</button>
-      </h1>
+      <Header />
       <Wrapper>
-        <UserInfo>
-          <h2>{userInfo.user_name}</h2>
-          <h4>
-            {`我的點數 ${userInfo.points}`}
-          </h4>
-          {
+        <Title>我的帳戶</Title>
+        <UserInfoWrapper>
+          <UserInfo>
+            <h2>{userInfo.user_name}</h2>
+            <h4>
+              {`我的點數 ${userInfo.points}`}
+            </h4>
+            {
             reminds?.map?.((remind) => <RemindCard remind={remind} key={remind.reserve_id} />)
           }
-        </UserInfo>
-        <TabWrapper>
-          <TabBar>
-            <Button to="/user/processing">進行中</Button>
-            <Button to="/user/reserve">預約中</Button>
-            <Button to="/user/orders">全部訂單</Button>
-          </TabBar>
-          <Outlet />
-        </TabWrapper>
+          </UserInfo>
+          <TabWrapper>
+            <TabBar>
+              <Button to="/user/processing">進行中</Button>
+              <Button to="/user/reserve">預約中</Button>
+              <Button to="/user/orders">全部訂單</Button>
+            </TabBar>
+            <Outlet />
+          </TabWrapper>
+        </UserInfoWrapper>
       </Wrapper>
+
     </>
   );
 }

@@ -1,10 +1,19 @@
+/* eslint-disable no-undef */
 import {
-  useEffect, useRef, useState, useContext,
+  useEffect, useState,
 } from 'react';
 import { Link } from 'react-router-dom';
+import { FullPage, Slide } from 'react-full-page';
 import { PropTypes } from 'prop-types';
 import styled from 'styled-components/macro';
-import { firebaseStores, firebaseUsers } from '../utils/firestore';
+import { firebaseStores } from '../utils/firestore';
+import LaundryMap from '../components/laundryMap';
+import StoreJoinForm from '../components/StoreJoinForm';
+import UserRegisterForm from '../components/UserRegisterForm';
+import { HomeHeader } from '../components/Header';
+import {
+  FirstBanner, SectionA, SectionB, SectionC,
+} from '../components/Section';
 
 const StoreCard = styled.div`
   padding: 10px 20px;
@@ -18,43 +27,6 @@ const StoreCard = styled.div`
     flex: 2;
   }
 `;
-
-function RegisterForm() {
-  const registerName = useRef();
-  const registerEmail = useRef();
-  const registerPassword = useRef();
-
-  const postRegister = () => {
-    firebaseUsers.register(
-      registerName.current.value,
-      registerEmail.current.value,
-      registerPassword.current.value,
-    );
-
-    registerName.current.value = '';
-    registerEmail.current.value = '';
-    registerPassword.current.value = '';
-  };
-  return (
-    <div>
-      <h2>會員註冊</h2>
-      <label htmlFor="registerName">
-        名稱
-        <input type="text" name="registerName" placeholder="怎麼稱呼你呢" ref={registerName} />
-      </label>
-      <label htmlFor="registerEmail">
-        Email
-        <input type="email" name="registerEmail" placeholder="輸入email" ref={registerEmail} />
-      </label>
-      <label htmlFor="registerPassword">
-        密碼
-        <input type="password" name="registerPassword" placeholder="輸入密碼" ref={registerPassword} />
-      </label>
-      <button type="button" onClick={postRegister}>註冊</button>
-    </div>
-  );
-}
-
 function Store({ item }) {
   return (
     <StoreCard>
@@ -77,31 +49,7 @@ Store.propTypes = {
 };
 
 function Home() {
-  const userInfo = useContext(firebaseUsers.AuthContext);
   const [stores, setStores] = useState([]);
-  const storeNameRef = useRef(null);
-  const storeAddressRef = useRef(null);
-  const storePhoneRef = useRef(null);
-
-  const handlePostStore = () => {
-    if (!userInfo.user_id) {
-      window.location.href = './login';
-    }
-
-    const postData = {};
-    postData.address = storeAddressRef.current.value;
-    postData.store_name = storeNameRef.current.value;
-    postData.phone = storePhoneRef.current.value;
-    postData.user_id = userInfo.user_id;
-
-    const storeId = firebaseStores.post(postData);
-    const newStoreIds = [...userInfo.storeIds, storeId];
-    firebaseUsers.updateStoreIds(userInfo.user_id, newStoreIds);
-
-    storeAddressRef.current.value = '';
-    storeNameRef.current.value = '';
-    storePhoneRef.current.value = '';
-  };
   useEffect(() => {
     const handleStoresUpdate = (newData) => {
       setStores(newData);
@@ -109,49 +57,36 @@ function Home() {
     return firebaseStores.onStoresShot(handleStoresUpdate);
   }, []);
   return (
-    <div>
-      {
-        !userInfo
-          ? (
-            <Link to="/login">
-              <button type="button">登入</button>
-            </Link>
-          )
-          : (
-            <>
-              <span>{`哈囉! ${userInfo.user_name}`}</span>
-              <Link to="/user/processing">我的帳戶</Link>
-            </>
-          )
-      }
-      <RegisterForm />
-
-      <div>
-        <h2>店家入駐</h2>
-        <label htmlFor="storeName">
-          店家名稱
-          <input type="text" name="storeName" placeholder="妳的店名..." ref={storeNameRef} />
-        </label>
-        <label htmlFor="storeAddress">
-          店家地址
-          <input type="text" name="storeAddress" placeholder="店在哪裡..." ref={storeAddressRef} />
-        </label>
-        <label htmlFor="storePhone">
-          電話
-          <input type="text" name="storePhone" placeholder="連絡電話..." ref={storePhoneRef} />
-        </label>
-        <button type="submit" onClick={handlePostStore}>入駐店家</button>
-      </div>
-
-      <div>
-        {
-          stores.map((item) => <Store item={item} key={item.store_id} />)
-        }
-      </div>
-      <div>
-        <h2>找一找</h2>
-      </div>
-    </div>
+    <FullPage duration={400} controls={HomeHeader}>
+      <Slide>
+        <FirstBanner />
+      </Slide>
+      <Slide>
+        <SectionA />
+      </Slide>
+      <Slide>
+        <SectionB />
+      </Slide>
+      <Slide>
+        <SectionC />
+      </Slide>
+      <Slide>
+        <LaundryMap />
+      </Slide>
+      <Slide>
+        <div style={{ padding: '20px' }}>
+          {
+            stores?.map((item) => <Store item={item} key={item.store_id} />)
+          }
+        </div>
+      </Slide>
+      <Slide>
+        <UserRegisterForm />
+      </Slide>
+      <Slide>
+        <StoreJoinForm />
+      </Slide>
+    </FullPage>
   );
 }
 
