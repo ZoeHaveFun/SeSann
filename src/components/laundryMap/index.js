@@ -15,20 +15,27 @@ import { useEffect, useRef, useState } from 'react';
 import {
   map, find, propEq,
 } from 'ramda';
-import Select from 'react-select';
+import ReactSelect from 'react-select';
 import { Link } from 'react-router-dom';
-import { firebaseStores } from '../../utils/firestore';
+import {
+  Pets, Water, DryCleaning,
+} from '@styled-icons/material-rounded';
+import { firebaseStores, firebaseMachines } from '../../utils/firestore';
 import userIcon from '../../style/imgs/location.png';
 import storeIcon from '../../style/imgs/store.png';
 import DistrictData from '../../utils/taiwanDistricts.json';
 
 const Wrapper = styled.div`
   padding-top: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 `;
 
 const MapWrapper = styled.div`
-  height: 500px;
-  padding: 10px 50px;
+  height: 440px;
+  width: 80%;
+  margin: auto;
   z-index: 2;
 `;
 
@@ -37,11 +44,34 @@ const SelectWrapper = styled.div`
   margin: auto;
   display: flex;
   z-index: 9;
+  box-shadow: 0px 0px 8px #DDE1E4;
+  border-radius: 1rem;
+  margin: 8px auto 20px auto;
 `;
 const SelectBar = styled.div`
   width: 50%;
 `;
-
+const CustomSelect = styled(ReactSelect)`
+  border-radius: ${(props) => (props.city ? '1rem 0rem 0rem 1rem' : '0rem 1rem 1rem 0rem')};
+  font-family: 'Noto Sans TC', sans-serif;
+  color: #023047;
+  .react-select__control {
+    border-radius: ${(props) => (props.city ? '1rem 0rem 0rem 1rem' : '0rem 1rem 1rem 0rem')};
+  }
+  .react-select__control--is-focused {
+    box-shadow: 0px 0px 0px 1px #1C5174;
+  }
+  .react-select__single-value{
+    color: #023047;
+  }
+  .react-select__option--is-focused {
+    background: #DDE1E4;
+  }
+  .react-select__option--is-selected {
+    background: #FFC94A;
+    color: #1C5174;
+  }
+`;
 function SelectLocationBar(props) {
   const {
     city, setCity, district, setDistrict, districts, setDistricts,
@@ -81,7 +111,9 @@ function SelectLocationBar(props) {
   return (
     <SelectWrapper>
       <SelectBar>
-        <Select
+        <CustomSelect
+          city
+          classNamePrefix="react-select"
           options={cities()}
           value={selectedCity(city)}
           onChange={handleCityChange}
@@ -89,7 +121,8 @@ function SelectLocationBar(props) {
         />
       </SelectBar>
       <SelectBar>
-        <Select
+        <CustomSelect
+          classNamePrefix="react-select"
           value={selectedDistrict(district)}
           options={districts}
           placeholder="選擇區域"
@@ -148,30 +181,127 @@ ChangeCenter.propTypes = {
     ),
   ).isRequired,
 };
-// ChangeCenter.propTypes = {
-//   boundry: PropTypes.shape([
-//     PropTypes.shape,
-//   ]).isRequired,
-// };
 
-function SetBoundsRectangles({ boundry }) {
-  const Lmap = useMap();
-  if (boundry.length !== 0) {
-    Lmap.fitBounds(boundry);
+const marlerColor = (type) => {
+  if (type === 'wash') return '#219EBC';
+  if (type === 'dry') return '#F08137';
+  return '#1C5174';
+};
+const StatusWrapper = styled.div`
+  display: flex;
+`;
+const Icon = styled.span`
+  font-size: 16px;
+  line-height: 30px;
+  margin-right: 8px;
+  color: ${(props) => (marlerColor(props.type))};
+  & > svg {
+    width: 30px;
   }
+`;
+function MapMarker({ store }) {
+  const [Machines, setMachines] = useState([]);
+  const [idleWash, setIdleWash] = useState([]);
+  const [idleDry, setIdleDry] = useState([]);
+  const [idlePet, setIdlePet] = useState([]);
+  useEffect(() => {
+    const washMachine = Machines.filter((machine) => machine.type === 'wash' && machine.status === 0);
+    const dryMachine = Machines.filter((machine) => machine.type === 'dry' && machine.status === 0);
+    const petMachine = Machines.filter((machine) => machine.type === 'pet' && machine.status === 0);
+    setIdleWash(washMachine);
+    setIdleDry(dryMachine);
+    setIdlePet(petMachine);
+  }, [Machines]);
+  useEffect(() => {
+    const handleMachinessUpdate = (newData) => {
+      setMachines(newData);
+    };
+    return firebaseMachines.onMachinesShot(store.store_id, 'store_id', handleMachinessUpdate);
+  }, [store.store_id]);
+  return (
+    <Marker
+      key={store.store_id}
+      position={[store.location.lat, store.location.lng]}
+      icon={icon.store}
+    >
+      <Popup>
+        <span>{store.store_name}</span>
+        <StatusWrapper>
+          {
+            idleWash.length
+              ? (
+                <Icon type="wash">
+                  <Water />
+                  {idleWash.length}
+                </Icon>
+              ) : ''
+          }
+          {
+            idleDry.length
+              ? (
+                <Icon type="dry">
+                  <DryCleaning />
+                  {idleDry.length}
+                </Icon>
+              ) : ''
+          }
+          {
+            idlePet.length
+              ? (
+                <Icon type="pet">
+                  <Pets />
+                  {idlePet.length}
+                </Icon>
+              ) : ''
+          }
+        </StatusWrapper>
+        <Link to={`/store?store_id=${store.store_id}`}>前往店家</Link>
+      </Popup>
+      <Tooltip sticky>{store.store_name}</Tooltip>
+    </Marker>
+  );
 }
-SetBoundsRectangles.propTypes = {
-  boundry: PropTypes.shape([
-    PropTypes.shape([
-      PropTypes.number.isRequired,
-    ]),
-  ]),
+MapMarker.propTypes = {
+  store: PropTypes.shape({
+    store_id: PropTypes.number.isRequired,
+    store_name: PropTypes.string.isRequired,
+    location: PropTypes.shape({
+      lat: PropTypes.number.isRequired,
+      lng: PropTypes.number.isRequired,
+    }).isRequired,
+  }).isRequired,
 };
 
+const TitleDiv = styled.div`
+  width: 80%;
+  display: flex;
+  margin: auto;
+  font-family: 'Noto Sans TC', sans-serif;
+  color:  #1C5174;
+  & >h2 {
+    font-size: 32px;
+    margin-right: 10px;
+    letter-spacing: 0.2rem;
+  }
+`;
+const SecTitle = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-bottom: 4px;
+  font-size: 16px;
+  font-weight: 500;
+  span:nth-child(2) {
+    display: inline-block;
+    background-color: #DDE1E4;
+    padding: 1px 8px;
+    margin-top: 2px;
+    width: 60px;
+  }
+`;
 function LaundryMap() {
   const [location, setLocation] = useState([23.991074, 121.611198]);
   const mapRef = useRef(null);
-  // const preBoundryRef = useRef(null);
   const [boundry, setBoundry] = useState([]);
   const [city, setCity] = useState('');
   const [district, setDistrict] = useState('');
@@ -206,7 +336,13 @@ function LaundryMap() {
 
   return (
     <Wrapper>
-      <h2>找一找</h2>
+      <TitleDiv>
+        <h2>找一找</h2>
+        <SecTitle>
+          <span>附近的自助洗衣</span>
+          <span />
+        </SecTitle>
+      </TitleDiv>
       <SelectLocationBar
         city={city}
         setCity={setCity}
@@ -222,9 +358,8 @@ function LaundryMap() {
           bounds={mapRef.current ? boundry : null}
           ref={mapRef}
           scrollWheelZoom
-          style={{ width: '100%', height: '100%' }}
+          style={{ width: '100%', height: '100%', borderRadius: '0.8rem' }}
         >
-          {/* <SetBoundsRectangles bounds={boundry} /> */}
           <ChangeCenter boundry={boundry} />
           <TileLayer
             attribution={attributionUrl}
@@ -236,17 +371,7 @@ function LaundryMap() {
           </Marker>
           {
             storesMarker?.map?.((store) => (
-              <Marker
-                key={store.store_id}
-                position={[store.location.lat, store.location.lng]}
-                icon={icon.store}
-              >
-                <Popup>
-                  <span>{store.store_name}</span>
-                  <Link to={`/store?store_id=${store.store_id}`}>前往店家</Link>
-                </Popup>
-                <Tooltip sticky>{store.store_name}</Tooltip>
-              </Marker>
+              <MapMarker store={store} />
             ))
           }
         </MapContainer>
