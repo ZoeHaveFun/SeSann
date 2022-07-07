@@ -31,9 +31,10 @@ export const firebaseUsers = {
     await setDoc(doc(db, this.tableName, result.user.uid), {
       user_id: result.user.uid,
       user_name: name,
-      points: 300,
+      points: 1000,
       orders: [],
       storeIds: [],
+      collectIds: [],
     });
   },
   signIn(email, password) {
@@ -74,6 +75,11 @@ export const firebaseUsers = {
   updateStoreIds(UserId, newData) {
     updateDoc(doc(db, this.tableName, UserId), {
       storeIds: newData,
+    });
+  },
+  updateCollectIds(UserId, newData) {
+    updateDoc(doc(db, this.tableName, UserId), {
+      collectIds: newData,
     });
   },
 };
