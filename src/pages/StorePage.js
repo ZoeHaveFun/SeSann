@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import {
   useEffect, useState, useContext,
 } from 'react';
@@ -12,7 +11,8 @@ import {
   firebaseMachines, firebaseStores, firebaseProcessing, firebaseReserve, firebaseUsers,
 } from '../utils/firestore';
 import handleIdleMachines from '../utils/reuseFunc';
-import { Header } from '../components/Header';
+import Header from '../components/Header';
+import MachineCard from '../components/MachineCard';
 import DefaultstoreMainImg from '../style/imgs/storeMainImg.jpg';
 
 const duration = require('dayjs/plugin/duration');
@@ -22,104 +22,13 @@ dayjs.extend(duration);
 const Wrapper = styled.div`
   padding-top: 100px;
 `;
-const MachineWrapper = styled.div`
+const MachinesWrapper = styled.div`
+  margin-top:  20px;
   display: flex;
-  padding: 10px 20px;
-  margin: 10px 20px;
-  border-bottom: 1px #333 solid;
-  align-items: center;
+  flex-wrap: wrap;
+  flex-direction: row;
+  gap: 30px 20px;
 `;
-const Button = styled.button`
-  border: 1px #001c55 solid;
-  border-radius: 0.5rem;
-  cursor: ${(props) => (props.isProcessing || props.notAllow ? 'not-allowed' : 'pointer')};
-  &:hover{
-    box-shadow: 0px 0px 4px #999;
-  }
-`;
-const CategoryBtn = styled(Button)`
-  padding: 4px 8px;
-  flex: 1;
-  height: 40px;
-  border: ${(props) => (props.isSelected ? '4px #666 solid' : '1px #999 solid')};
-`;
-const CategoryWrapper = styled.div`
-  margin: 0px 40px 0px 20px;
-  width: 600px;
-  display: flex;
-  gap: 20px;
-`;
-const EffectWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  & > button {
-    padding: 8px;
-    margin: 4px;
-  }
-`;
-function MachineCard({ machine, handleProcessing, handleReserve }) {
-  const [categoryIndex, setCategoryIndex] = useState(null);
-  const [reverveList, setReverveList] = useState([]);
-  const totalTime = () => reverveList.reduce((pre, current) => pre + current.category.time, 0);
-
-  useEffect(() => {
-    const handleReserveUpdate = (newData) => {
-      setReverveList(newData);
-    };
-    return firebaseReserve.onReserveShot(machine.machine_id, 'machine_id', handleReserveUpdate);
-  }, [machine.machine_id]);
-
-  return (
-    <MachineWrapper>
-      <span>{machine.machine_name}</span>
-      <CategoryWrapper>
-        {
-          machine.categorys.map((category, idx) => (
-            <CategoryBtn
-              onClick={() => setCategoryIndex(idx)}
-              key={category.name}
-              isSelected={categoryIndex === idx}
-            >
-              {`${category.name} ${category.time}分鐘 ${category.price}元`}
-            </CategoryBtn>
-          ))
-        }
-      </CategoryWrapper>
-      <EffectWrapper>
-        {
-          machine.status === 0
-            ? (
-              <Button
-                type="button"
-                onClick={() => {
-                  handleProcessing(machine.machine_id, categoryIndex);
-                  setCategoryIndex('');
-                }}
-              >
-                付款啟動
-              </Button>
-            )
-            : <Button type="button" isProcessing>運轉中</Button>
-        }
-        <Button
-          type="button"
-          onClick={() => {
-            handleReserve(machine.machine_id, categoryIndex);
-            setCategoryIndex('');
-          }}
-          notAllow={!machine.status}
-        >
-          即時預定
-
-        </Button>
-        <span>
-          {`預約人數:${reverveList.length}`}
-        </span>
-        {reverveList.length !== 0 ? <span>{`預計等待時間:${totalTime()}分鐘`}</span> : ''}
-      </EffectWrapper>
-    </MachineWrapper>
-  );
-}
 
 const StoreHeaderStyled = styled.div`
   display: flex;
@@ -131,10 +40,11 @@ const StoreInfo = styled.div`
   position: relative;
   flex: 1.5;
   background-color: #DDE1E4;
-  margin-right: 10px;
+  margin-right: 20px;
   border-radius: 0.8rem;
   padding: 16px 22px 10px;
-  color: #023047;
+  color: #1C5174;
+  box-shadow: 0px 0px 8px #8B8C89;
   h4 {
     margin-left: 10px;
     font-weight: 500;
@@ -160,12 +70,21 @@ const StoreSection = styled.div`
   flex-direction: column;
   flex: 1;
   padding: 16px 0px 10px;
-  span {
-
+  color: #1C5174;
+  font-family: 'Noto Sans TC', sans-serif;
+  > span {
+    padding-left: 10px;
+  }
+  > span:nth-child(2) {
+    background-color: #DDE1E4;
+    /* width: 180px; */
+    margin: 4px 0px 0px 10px;
+    padding: 1px 8px;
   }
   div {
     display: flex;
     flex: 1;
+    padding: 24px 0px 24px 6px;
   }
 `;
 const markerColor = (type) => {
@@ -179,9 +98,12 @@ const Icon = styled.span`
   align-items: center;
   font-size: 24px;
   line-height: 50px;
-  margin-right: 8px;
-  flex: 1;
+  margin-right: 16px;
   color: ${(props) => (markerColor(props.type))};
+  &+& {
+    border-left: 1.8px #E7ECEF solid;
+    padding-left: 16px;
+  }
   & > svg {
     width: 50px;
     margin-right: 10px;
@@ -191,11 +113,11 @@ const Icon = styled.span`
 const CollecIcon = styled(HeartCircle)`
   width: 32px;
   position: absolute;
-  right: 10px;
-  bottom: 10px;
+  right: 14px;
+  top: 14px;
   border-radius: 50%;
   cursor: pointer;
-  color: ${(props) => (props.like ? '#219EBC' : '#8B8C89')};
+  color: ${(props) => (props.like ? '#b64a41' : '#8B8C89')};
   &:hover {
     box-shadow: 0px 0px 10px #8B8C89;
   }
@@ -204,7 +126,6 @@ const CollecIcon = styled(HeartCircle)`
 function StoreHeader({ storeInfo, idleMachines }) {
   const userInfo = useContext(firebaseUsers.AuthContext);
   const handleCollec = () => {
-    console.log(storeInfo.store_id);
     if (!userInfo.collectIds.includes(storeInfo.store_id)) {
       const newData = [...userInfo.collectIds];
       newData.push(storeInfo.store_id);
@@ -225,12 +146,13 @@ function StoreHeader({ storeInfo, idleMachines }) {
         <h4>{storeInfo.address}</h4>
         <h4>{storeInfo.phone}</h4>
         <CollecIcon
-          like={userInfo.collectIds.includes(storeInfo.store_id)}
+          like={userInfo.collectIds?.includes(storeInfo.store_id)}
           onClick={handleCollec}
         />
       </StoreInfo>
       <StoreSection>
         <span>目前可使用:</span>
+        <span />
         <div>
           <Icon type="wash">
             <Washer />
@@ -251,27 +173,59 @@ function StoreHeader({ storeInfo, idleMachines }) {
 }
 StoreHeader.propTypes = {
   storeInfo: PropTypes.shape({
-    store_name: PropTypes.string.isRequired,
-    store_id: PropTypes.string.isRequired,
-    address: PropTypes.string.isRequired,
-    phone: PropTypes.string.isRequired,
+    store_name: PropTypes.string,
+    store_id: PropTypes.string,
+    address: PropTypes.string,
+    phone: PropTypes.string,
   }).isRequired,
   idleMachines: PropTypes.shape({
-    wash: PropTypes.arrayOf().isRequired,
-    dry: PropTypes.arrayOf().isRequired,
-    pet: PropTypes.arrayOf().isRequired,
+    wash: PropTypes.arrayOf(),
+    dry: PropTypes.arrayOf(),
+    pet: PropTypes.arrayOf(),
   }).isRequired,
 };
 
+const Container = styled.div`
+  width: 80%;
+  margin: auto;
+`;
+const TagWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  font-family: 'Noto Sans TC', sans-serif;
+  color: #1C5174;
+`;
+const Tag = styled.span`
+  padding: 8px 16px;
+  box-shadow: 0px 0px 2px #8B8C89;
+  border-radius: 20px;
+  background-color: ${(props) => (props.isSelect ? '#FFB703' : '#FEFCFB')};
+  cursor: pointer;
+  &+&{
+    margin-left: 20px;
+  }
+  &:hover {
+    background-color: #8B8C89;
+    color: #E7ECEF;
+  }
+`;
+
 function StorePage() {
   const userInfo = useContext(firebaseUsers.AuthContext);
-  const [userReserveLists, setUserReserveLists] = useState([]);
   const storeId = useLocation().search.split('=')[1];
+  const [userReserveLists, setUserReserveLists] = useState([]);
   const [storeInfo, setStoreInfo] = useState({});
   const [machines, setMachines] = useState([]);
+  const [filterMachines, setFilterMachines] = useState([]);
+  const [tag, setTag] = useState('all');
   const [idleMachines, setIdleMachines] = useState({});
   const [flexibleTime] = useState(3);
 
+  const ChangeTag = (e) => {
+    if (e.target.attributes[0].nodeName !== 'data-tag') return;
+    const tagValue = e.target.attributes[0].value;
+    setTag(tagValue);
+  };
   const getProcessEndtime = (machineId) => firebaseProcessing.getQuery(machineId, 'machine_id')
     .then((res) => res.map((docc) => docc.data()))
     .then((data) => data[0].end_time.seconds * 1000);
@@ -362,7 +316,14 @@ function StorePage() {
       firebaseReserve.delet(checkUserReserved[0].reserve_id);
     }
   };
-
+  useEffect(() => {
+    if (tag === 'all') {
+      setFilterMachines(machines);
+    } else {
+      const filterM = machines.filter((machine) => machine.type === tag);
+      setFilterMachines(filterM);
+    }
+  }, [machines, tag]);
   useEffect(() => {
     firebaseStores.getOne(storeId)
       .then((res) => setStoreInfo(res));
@@ -370,6 +331,7 @@ function StorePage() {
   useEffect(() => {
     const handleMachinessUpdate = (newData) => {
       setMachines(newData);
+      setFilterMachines(newData);
       const result = handleIdleMachines(newData);
       setIdleMachines(result);
     };
@@ -381,37 +343,28 @@ function StorePage() {
       <Header />
       <Wrapper>
         <StoreHeader storeInfo={storeInfo} idleMachines={idleMachines} />
-        <div>
-          <h3>全部機台</h3>
-          {machines.map((item) => (
-            <MachineCard
-              machine={item}
-              key={item.machine_id}
-              handleProcessing={handleProcessing}
-              handleReserve={handleReserve}
-            />
-          ))}
-        </div>
+        <Container>
+          <TagWrapper onClick={(e) => { ChangeTag(e); }}>
+            <Tag data-tag="all" isSelect={tag === 'all'}>全部</Tag>
+            <Tag data-tag="wash" isSelect={tag === 'wash'}>洗衣</Tag>
+            <Tag data-tag="dry" isSelect={tag === 'dry'}>烘衣</Tag>
+            <Tag data-tag="pet" isSelect={tag === 'pet'}>寵物專用</Tag>
+          </TagWrapper>
+          <MachinesWrapper>
+            {filterMachines.length === 0 ? <p>沒有餒~</p>
+              : filterMachines.map((item) => (
+                <MachineCard
+                  machine={item}
+                  key={item.machine_id}
+                  handleProcessing={handleProcessing}
+                  handleReserve={handleReserve}
+                />
+              ))}
+          </MachinesWrapper>
+        </Container>
       </Wrapper>
     </>
   );
 }
 
 export default StorePage;
-
-MachineCard.propTypes = {
-  machine: PropTypes.shape({
-    machine_id: PropTypes.string.isRequired,
-    machine_name: PropTypes.string.isRequired,
-    status: PropTypes.number.isRequired,
-    store_id: PropTypes.string.isRequired,
-    type: PropTypes.string.isRequired,
-    categorys: PropTypes.arrayOf(PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      price: PropTypes.number.isRequired,
-      time: PropTypes.number.isRequired,
-    })).isRequired,
-  }).isRequired,
-  handleProcessing: PropTypes.func.isRequired,
-  handleReserve: PropTypes.func.isRequired,
-};
