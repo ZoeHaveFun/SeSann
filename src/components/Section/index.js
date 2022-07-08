@@ -1,8 +1,10 @@
 import styled from 'styled-components/macro';
+import { PropTypes } from 'prop-types';
 import useWeb from '../../style/imgs/useWeb.jpg';
 import scanQrCode from '../../style/imgs/scanQrCode.png';
 import laundryMap from '../../style/imgs/laundryMap.jpg';
 import doLaundry from '../../style/imgs/doLaundry.jpg';
+// import loading from '../../style/imgs/loading.gif';
 
 const Banner = styled.div`
   background-image: url(${(props) => props.img});
@@ -11,20 +13,32 @@ const Banner = styled.div`
   background-repeat: ${(props) => (props.isFirst ? 'repeat' : 'no-repeat')};
 
   width: 100vw;
-  height: calc(100%);
+  height: 100vh;
   ${(props) => (props.isFirst ? 'padding-top: 80px;' : 'padding: 100px 50px 40px 50px;')}
   
 `;
+// const LoadingImg = styled.img`
+//   width: 50px;
+// `;
+// const LoadingDiv = styled.div`
+//   width: 50px;
+//   background-image: url(${(props) => props.src});
+// `;
 
-function FirstBanner() {
+function FirstBanner({ FirstBannerRef }) {
   return (
-    <Banner img={doLaundry} isFirst />
+    <>
+      <Banner ref={FirstBannerRef} img={doLaundry} isFirst />
+      {/* <LoadingImg src={loading} /> */}
+    </>
   );
 }
-
-function SectionA() {
+FirstBanner.propTypes = {
+  FirstBannerRef: PropTypes.func.isRequired,
+};
+function SectionA({ AboutRef }) {
   return (
-    <Banner img={laundryMap}>
+    <Banner img={laundryMap} ref={AboutRef}>
       <h1>
         洗衣地圖
         <br />
@@ -34,7 +48,9 @@ function SectionA() {
 
   );
 }
-
+SectionA.propTypes = {
+  AboutRef: PropTypes.func.isRequired,
+};
 function SectionB() {
   return (
     <Banner img={useWeb}>

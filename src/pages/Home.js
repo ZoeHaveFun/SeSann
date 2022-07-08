@@ -1,16 +1,15 @@
 /* eslint-disable no-undef */
 import {
-  useEffect, useState,
+  useEffect, useRef, useState,
 } from 'react';
-import { Link } from 'react-router-dom';
-import { FullPage, Slide } from 'react-full-page';
+import { Link, useLocation } from 'react-router-dom';
 import { PropTypes } from 'prop-types';
 import styled from 'styled-components/macro';
 import { firebaseStores } from '../utils/firestore';
 import LaundryMap from '../components/laundryMap';
 import StoreJoinForm from '../components/StoreJoinForm';
 import UserRegisterForm from '../components/UserRegisterForm';
-import { HomeHeader } from '../components/Header';
+import Header from '../components/Header';
 import {
   FirstBanner, SectionA, SectionB, SectionC,
 } from '../components/Section';
@@ -50,6 +49,25 @@ Store.propTypes = {
 
 function Home() {
   const [stores, setStores] = useState([]);
+  const pathTo = useLocation().search.split('=')[1];
+  const LaundryMapRef = useRef();
+  const FirstBannerRef = useRef();
+  const JoinFormRef = useRef();
+  const AboutRef = useRef();
+  useEffect(() => {
+    if (pathTo === 'map') {
+      LaundryMapRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+    if (pathTo === 'home') {
+      FirstBannerRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+    if (pathTo === 'join') {
+      JoinFormRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+    if (pathTo === 'about') {
+      AboutRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [pathTo]);
   useEffect(() => {
     const handleStoresUpdate = (newData) => {
       setStores(newData);
@@ -57,36 +75,21 @@ function Home() {
     return firebaseStores.onStoresShot(handleStoresUpdate);
   }, []);
   return (
-    <FullPage duration={400} controls={HomeHeader}>
-      <Slide>
-        <FirstBanner />
-      </Slide>
-      <Slide>
-        <SectionA />
-      </Slide>
-      <Slide>
-        <SectionB />
-      </Slide>
-      <Slide>
-        <SectionC />
-      </Slide>
-      <Slide>
-        <LaundryMap />
-      </Slide>
-      <Slide>
-        <div style={{ padding: '20px' }}>
-          {
-            stores?.map((item) => <Store item={item} key={item.store_id} />)
-          }
-        </div>
-      </Slide>
-      <Slide>
-        <UserRegisterForm />
-      </Slide>
-      <Slide>
-        <StoreJoinForm />
-      </Slide>
-    </FullPage>
+    <>
+      <Header />
+      <FirstBanner FirstBannerRef={FirstBannerRef} />
+      <SectionA AboutRef={AboutRef} />
+      <SectionB />
+      <SectionC />
+      <LaundryMap LaundryMapRef={LaundryMapRef} />
+      <div style={{ padding: '20px' }}>
+        {
+          stores?.map((item) => <Store item={item} key={item.store_id} />)
+        }
+      </div>
+      <UserRegisterForm JoinFormRef={JoinFormRef} />
+      <StoreJoinForm />
+    </>
   );
 }
 

@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import styled from 'styled-components/macro';
+import { PropTypes } from 'prop-types';
 import { firebaseUsers } from '../../utils/firestore';
 
 const Wrapper = styled.div`
@@ -8,7 +9,7 @@ const Wrapper = styled.div`
   height: 100vh;
 `;
 
-function UserRegisterForm() {
+function UserRegisterForm({ JoinFormRef }) {
   const registerName = useRef();
   const registerEmail = useRef();
   const registerPassword = useRef();
@@ -25,7 +26,7 @@ function UserRegisterForm() {
     registerPassword.current.value = '';
   };
   return (
-    <Wrapper>
+    <Wrapper ref={JoinFormRef}>
       <h2>會員註冊</h2>
       <label htmlFor="registerName">
         名稱
@@ -45,3 +46,7 @@ function UserRegisterForm() {
 }
 
 export default UserRegisterForm;
+
+UserRegisterForm.propTypes = {
+  JoinFormRef: PropTypes.func.isRequired,
+};

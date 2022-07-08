@@ -291,7 +291,7 @@ const SecTitle = styled.div`
     width: 60px;
   }
 `;
-function LaundryMap() {
+function LaundryMap({ LaundryMapRef }) {
   const [location, setLocation] = useState([23.991074, 121.611198]);
   const mapRef = useRef(null);
   const [boundry, setBoundry] = useState([]);
@@ -327,7 +327,7 @@ function LaundryMap() {
   }, []);
 
   return (
-    <Wrapper>
+    <Wrapper ref={LaundryMapRef}>
       <TitleDiv>
         <h2>找一找</h2>
         <SecTitle>
@@ -373,3 +373,7 @@ function LaundryMap() {
   );
 }
 export default LaundryMap;
+
+LaundryMap.propTypes = {
+  LaundryMapRef: PropTypes.func.isRequired,
+};
