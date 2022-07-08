@@ -7,7 +7,7 @@ import styled from 'styled-components/macro';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import { firebaseStores, firebaseUsers, firebaseMachines } from '../utils/firestore';
-import { Header } from '../components/Header';
+import Header from '../components/Header';
 import AddMachineForm from '../components/AddMachineForm';
 
 const duration = require('dayjs/plugin/duration');
@@ -173,6 +173,10 @@ function Backstage() {
           setStoreData(newData);
         });
     }
+    if (e.target.name === 'storeName') {
+      newData.store_name = e.target.value;
+      setStoreData(newData);
+    }
     if (e.target.name === 'phone') {
       newData.phone = e.target.value;
       setStoreData(newData);
@@ -232,6 +236,10 @@ function Backstage() {
             storeData ? (
               <>
                 <div>
+                  <label htmlFor="storeName">
+                    店名:
+                    <input type="text" name="storeName" value={storeData.store_name} disabled={!edit} onChange={(e) => { changeStoreData(e); }} />
+                  </label>
                   <label htmlFor="address">
                     地址:
                     <input type="text" name="address" value={storeData.address} disabled={!edit} onChange={(e) => { changeStoreData(e); }} />

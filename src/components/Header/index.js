@@ -1,7 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components/macro';
-import { PropTypes } from 'prop-types';
 import {
   Menu, QrCode, LocalLaundryService, Map,
 } from '@styled-icons/material-rounded';
@@ -19,14 +19,14 @@ const HeaderWrapper = styled.div`
   padding: 10px 20px;
   font-family: 'Noto Sans TC', sans-serif;
   background-color: #ffffff;
-  color: #034078;
+  color: #1C5174;
   box-shadow: 0px 0px 8px #0a1128;
 `;
 const Logo = styled.div`
   display: flex;
   align-items: center;
   font-size: 34px;
-  color: #034078;
+  color: #1C5174;
   & > img {
     width: 46px;
     margin-right: 20px;
@@ -46,7 +46,7 @@ const NavBtn = styled.button`
   font-size: 16px;
   background-color: transparent;
   border: transparent;
-  color: #034078;
+  color: #1C5174;
   cursor: pointer;
 `;
 const Icon = styled.span`
@@ -63,7 +63,7 @@ const Login = styled.button`
   padding: 10px 16px;
   border-radius: 0.8rem;
   font-size: 16px;
-  color: #034078;
+  color: #1C5174;
   box-shadow: 0px 0px 4px #0a1128;
   margin-left: 10px;
   &:hover {
@@ -134,7 +134,7 @@ function Header() {
 
   return (
     <HeaderWrapper>
-      <Link to="/">
+      <Link to="/?to=home">
         <Logo>
           <img alt="logo" src={logo} />
           Mr. Raccoon
@@ -142,19 +142,25 @@ function Header() {
       </Link>
 
       <Nav>
-        <NavBtn type="button">關於Mr.Raccoon</NavBtn>
-        <NavBtn type="button">
-          找一找
-          <Icon><Map /></Icon>
-        </NavBtn>
+        <Link to="/?to=about">
+          <NavBtn type="button">關於Mr.Raccoon</NavBtn>
+        </Link>
+        <Link to="/?to=map">
+          <NavBtn type="button">
+            找一找
+            <Icon><Map /></Icon>
+          </NavBtn>
+        </Link>
         <NavBtn type="button">
           掃一掃
           <Icon><QrCode /></Icon>
         </NavBtn>
-        <NavBtn type="button">
-          我要加入
-          <Icon><LocalLaundryService /></Icon>
-        </NavBtn>
+        <Link to="/?to=join">
+          <NavBtn type="button">
+            我要加入
+            <Icon><LocalLaundryService /></Icon>
+          </NavBtn>
+        </Link>
         {
           !userInfo
             ? (
@@ -192,83 +198,4 @@ function Header() {
   );
 }
 
-function HomeHeader({ getCurrentSlideIndex, scrollToSlide }) {
-  const currentSlideIndex = getCurrentSlideIndex();
-  const userInfo = useContext(firebaseUsers.AuthContext);
-  const [menuOpen, serMenuOpen] = useState(false);
-  const navegate = useNavigate();
-  const Logout = () => {
-    firebaseUsers.signOut();
-    navegate('/', { replace: true });
-  };
-  const onClickMenu = (e) => {
-    const key = Number(e.target.attributes[1].value);
-    scrollToSlide(key - 1);
-  };
-
-  return (
-    <HeaderWrapper>
-      <Link to="/">
-        <Logo>
-          <img alt="logo" src={logo} />
-          Mr. Raccoon
-        </Logo>
-      </Link>
-
-      <Nav selectedKeys={[`${currentSlideIndex + 1}`]} onClick={(e) => { onClickMenu(e); }}>
-        <NavBtn type="button" data-key="2">關於Mr.Raccoon</NavBtn>
-        <NavBtn type="button" data-key="5">
-          找一找
-          <Icon><Map /></Icon>
-        </NavBtn>
-        <NavBtn type="button">
-          掃一掃
-          <Icon><QrCode /></Icon>
-        </NavBtn>
-        <NavBtn type="button" data-key="7">
-          我要加入
-          <Icon><LocalLaundryService /></Icon>
-        </NavBtn>
-        {
-          !userInfo
-            ? (
-              <Link to="/login">
-                <Login>Login</Login>
-              </Link>
-            )
-            : (
-              <BurgerWarpper>
-                <MenuIcon onClick={() => serMenuOpen(!menuOpen)} click={menuOpen} />
-                <MenuWrapper open={menuOpen}>
-                  <Link to="/user/processing"><span>進行中</span></Link>
-                  <Link to="/user/reserve"><span>預約中</span></Link>
-                  <Link to="/user/orders"><span>全部訂單</span></Link>
-                  <br />
-                  <Link to="/user">
-                    <span>我的帳戶</span>
-                  </Link>
-                  {
-                    userInfo.storeIds?.length !== 0
-                      ? (
-                        <Link to="/store/backstage">
-                          <span>我的店家</span>
-                        </Link>
-                      ) : ('')
-                  }
-                  <button type="button" onClick={Logout}>登出</button>
-                </MenuWrapper>
-                <UserImg src={userImgDefault} />
-              </BurgerWarpper>
-            )
-        }
-      </Nav>
-    </HeaderWrapper>
-  );
-}
-
-export { HomeHeader, Header };
-
-HomeHeader.propTypes = {
-  getCurrentSlideIndex: PropTypes.func.isRequired,
-  scrollToSlide: PropTypes.func.isRequired,
-};
+export default Header;

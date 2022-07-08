@@ -17,10 +17,10 @@ import {
 } from 'ramda';
 import ReactSelect from 'react-select';
 import { Link } from 'react-router-dom';
-import {
-  Pets, Water, DryCleaning,
-} from '@styled-icons/material-rounded';
+import { Pets } from '@styled-icons/material-rounded';
+import { Washer, Dryer } from '@styled-icons/boxicons-solid';
 import { firebaseStores, firebaseMachines } from '../../utils/firestore';
+import handleIdleMachines from '../../utils/reuseFunc';
 import userIcon from '../../style/imgs/location.png';
 import storeIcon from '../../style/imgs/store.png';
 import DistrictData from '../../utils/taiwanDistricts.json';
@@ -182,7 +182,7 @@ ChangeCenter.propTypes = {
   ).isRequired,
 };
 
-const marlerColor = (type) => {
+const markerColor = (type) => {
   if (type === 'wash') return '#219EBC';
   if (type === 'dry') return '#F08137';
   return '#1C5174';
@@ -194,27 +194,19 @@ const Icon = styled.span`
   font-size: 16px;
   line-height: 30px;
   margin-right: 8px;
-  color: ${(props) => (marlerColor(props.type))};
+  color: ${(props) => (markerColor(props.type))};
   & > svg {
     width: 30px;
   }
 `;
 function MapMarker({ store }) {
   const [Machines, setMachines] = useState([]);
-  const [idleWash, setIdleWash] = useState([]);
-  const [idleDry, setIdleDry] = useState([]);
-  const [idlePet, setIdlePet] = useState([]);
-  useEffect(() => {
-    const washMachine = Machines.filter((machine) => machine.type === 'wash' && machine.status === 0);
-    const dryMachine = Machines.filter((machine) => machine.type === 'dry' && machine.status === 0);
-    const petMachine = Machines.filter((machine) => machine.type === 'pet' && machine.status === 0);
-    setIdleWash(washMachine);
-    setIdleDry(dryMachine);
-    setIdlePet(petMachine);
-  }, [Machines]);
+  const [idleMachines, setIdleMachines] = useState({});
   useEffect(() => {
     const handleMachinessUpdate = (newData) => {
       setMachines(newData);
+      const result = handleIdleMachines(newData);
+      setIdleMachines(result);
     };
     return firebaseMachines.onMachinesShot(store.store_id, 'store_id', handleMachinessUpdate);
   }, [store.store_id]);
@@ -228,29 +220,29 @@ function MapMarker({ store }) {
         <span>{store.store_name}</span>
         <StatusWrapper>
           {
-            idleWash.length
+            idleMachines?.wash?.length > 0
               ? (
                 <Icon type="wash">
-                  <Water />
-                  {idleWash.length}
+                  <Washer />
+                  {idleMachines.wash.length}
                 </Icon>
               ) : ''
           }
           {
-            idleDry.length
+            idleMachines?.dry?.length > 0
               ? (
                 <Icon type="dry">
-                  <DryCleaning />
-                  {idleDry.length}
+                  <Dryer />
+                  {idleMachines.wash.length}
                 </Icon>
               ) : ''
           }
           {
-            idlePet.length
+            idleMachines?.pet?.length > 0
               ? (
                 <Icon type="pet">
                   <Pets />
-                  {idlePet.length}
+                  {idleMachines.wash.length}
                 </Icon>
               ) : ''
           }
@@ -299,7 +291,7 @@ const SecTitle = styled.div`
     width: 60px;
   }
 `;
-function LaundryMap() {
+function LaundryMap({ LaundryMapRef }) {
   const [location, setLocation] = useState([23.991074, 121.611198]);
   const mapRef = useRef(null);
   const [boundry, setBoundry] = useState([]);
@@ -335,7 +327,7 @@ function LaundryMap() {
   }, []);
 
   return (
-    <Wrapper>
+    <Wrapper ref={LaundryMapRef}>
       <TitleDiv>
         <h2>找一找</h2>
         <SecTitle>
@@ -381,3 +373,7 @@ function LaundryMap() {
   );
 }
 export default LaundryMap;
+
+LaundryMap.propTypes = {
+  LaundryMapRef: PropTypes.func.isRequired,
+};

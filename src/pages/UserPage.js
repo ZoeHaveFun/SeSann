@@ -4,7 +4,7 @@ import { PropTypes } from 'prop-types';
 import styled from 'styled-components/macro';
 import dayjs from 'dayjs';
 import { firebaseUsers, firebaseReserve } from '../utils/firestore';
-import { Header } from '../components/Header';
+import Header from '../components/Header';
 
 const duration = require('dayjs/plugin/duration');
 
@@ -21,6 +21,7 @@ const Title = styled.h1`
 const UserInfoWrapper = styled.div`
   display: flex;
   height: 50vh;
+  margin-top: 50px;
 `;
 const UserInfo = styled.div`
   width: 300px;
@@ -131,6 +132,7 @@ function UserPage() {
               <Button to="/user/processing">進行中</Button>
               <Button to="/user/reserve">預約中</Button>
               <Button to="/user/orders">全部訂單</Button>
+              <Button to="/user/collect">收藏店家</Button>
             </TabBar>
             <Outlet />
           </TabWrapper>

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { initializeApp } from 'firebase/app';
 import {
   createUserWithEmailAndPassword, getAuth,
@@ -31,9 +30,10 @@ export const firebaseUsers = {
     await setDoc(doc(db, this.tableName, result.user.uid), {
       user_id: result.user.uid,
       user_name: name,
-      points: 300,
+      points: 1000,
       orders: [],
       storeIds: [],
+      collectIds: [],
     });
   },
   signIn(email, password) {
@@ -76,6 +76,11 @@ export const firebaseUsers = {
       storeIds: newData,
     });
   },
+  updateCollectIds(UserId, newData) {
+    updateDoc(doc(db, this.tableName, UserId), {
+      collectIds: newData,
+    });
+  },
 };
 
 export const firebaseStores = {
@@ -108,15 +113,18 @@ export const firebaseStores = {
     const data = await getDocs(q);
     return data.docs;
   },
+  async collectQuery(collectIds, key) {
+    const q = query(collection(db, this.tableName), where(key, 'in', collectIds));
+    const data = await getDocs(q);
+    return data.docs;
+  },
   updateData(StoreId, data) {
     updateDoc(doc(db, this.tableName, StoreId), data);
   },
   async updateOrderRecord(StoreId, data) {
     const storeInfo = await firebaseStores.getOne(StoreId);
     const newData = [...storeInfo.order_record];
-    console.log(newData);
     newData.push(data);
-    console.log(newData);
     updateDoc(doc(db, this.tableName, StoreId), {
       order_record: newData,
     });

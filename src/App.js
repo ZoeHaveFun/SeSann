@@ -9,6 +9,7 @@ import UserPage from './pages/UserPage';
 import ProcessingPage from './pages/ProcessingPage';
 import ReservePage from './pages/ReservePage';
 import OrdersPage from './pages/OrdersPage';
+import CollectPage from './pages/CollectPage';
 import './App.css';
 import { firebaseUsers, auth } from './utils/firestore';
 
@@ -45,6 +46,7 @@ function App() {
             <Route path="processing" element={<ProcessingPage />} />
             <Route path="reserve" element={<ReservePage />} />
             <Route path="orders" element={<OrdersPage />} />
+            <Route path="collect" element={<CollectPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
