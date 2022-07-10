@@ -5,7 +5,10 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import StorePage from './pages/StorePage';
 import Backstage from './pages/Backstage';
+import BackManagePage from './pages/BackManagePage';
+import DashboardPage from './pages/DashboardPage';
 import UserPage from './pages/UserPage';
+import InformationPage from './pages/InformationPage';
 import ProcessingPage from './pages/ProcessingPage';
 import ReservePage from './pages/ReservePage';
 import OrdersPage from './pages/OrdersPage';
@@ -41,8 +44,12 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/store" element={<StorePage />} />
-          <Route path="/store/backstage" element={<Backstage />} />
+          <Route path="/store/backstage" element={<Backstage />}>
+            <Route index element={<DashboardPage />} />
+            <Route path="manage" element={<BackManagePage />} />
+          </Route>
           <Route path="/user" element={<UserPage />}>
+            <Route index element={<InformationPage />} />
             <Route path="processing" element={<ProcessingPage />} />
             <Route path="reserve" element={<ReservePage />} />
             <Route path="orders" element={<OrdersPage />} />

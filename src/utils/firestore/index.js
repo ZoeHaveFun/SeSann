@@ -66,6 +66,9 @@ export const firebaseUsers = {
       orders: newData,
     });
   },
+  updateData(UserId, newData) {
+    updateDoc(doc(db, this.tableName, UserId), newData);
+  },
   updatePointes(UserId, newPoints) {
     updateDoc(doc(db, this.tableName, UserId), {
       points: newPoints,
