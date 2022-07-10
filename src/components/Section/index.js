@@ -34,7 +34,7 @@ function FirstBanner({ FirstBannerRef }) {
   );
 }
 FirstBanner.propTypes = {
-  FirstBannerRef: PropTypes.func.isRequired,
+  FirstBannerRef: PropTypes.shape({}).isRequired,
 };
 function SectionA({ AboutRef }) {
   return (
@@ -49,7 +49,7 @@ function SectionA({ AboutRef }) {
   );
 }
 SectionA.propTypes = {
-  AboutRef: PropTypes.func.isRequired,
+  AboutRef: PropTypes.shape({}).isRequired,
 };
 function SectionB() {
   return (

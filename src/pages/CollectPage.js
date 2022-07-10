@@ -9,6 +9,7 @@ import DefaultstoreMainImg from '../style/imgs/storeMainImg.jpg';
 import handleIdleMachines from '../utils/reuseFunc';
 
 const CardWrapper = styled.div`
+  width: calc(100% / 3 - 20px);
   display: flex;
   flex-direction: row;
   box-shadow: 0px 0px 4px #8B8C89;

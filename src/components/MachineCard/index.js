@@ -9,6 +9,7 @@ import {
   Pets, AccessTime, MonetizationOn, SettingsPower, CalendarToday,
 } from '@styled-icons/material-rounded';
 import { firebaseReserve } from '../../utils/firestore';
+import '../../style/css/StorePage.css';
 
 const MachineItem = styled.div`
   width: calc(100% / 3 - 14px);
@@ -20,6 +21,7 @@ const MachineItem = styled.div`
   box-shadow: 0px 0px 1px #8B8C89;
   border-radius: 0.8rem;
   position: relative;
+  border: ${(props) => (props.light ? '1px #FDBF31 solid' : '')};
 `;
 const MachineInfo = styled.div`
   width: 100%;
@@ -73,7 +75,7 @@ const Button = styled.button`
 const ReserveDiv = styled.div`
   position: absolute;
   bottom: 10px;
-  right: 22px;
+  left: 22px;
   height: 36px;
   font-size: 12px;
   color: #8B8C89;
@@ -102,9 +104,10 @@ const NameSpan = styled.span`
 const TimeSpan = styled.span`
   display: flex;
   align-items: center;
-  margin-left: calc(100% / 5);
+  margin-left: calc(100% / 6);
   &>svg {
     width: 20px;
+    margin-right: 4px;
   }
 `;
 const PriceSpan = styled.span`
@@ -113,6 +116,7 @@ const PriceSpan = styled.span`
   justify-content: center;
   &>svg {
     width: 20px;
+    margin-right: 4px;
   }
 `;
 const CategoryWrapper = styled.div`
@@ -122,7 +126,9 @@ const CategoryWrapper = styled.div`
   gap: 8px;
   margin-top: 20px;
 `;
-function MachineCard({ machine, handleProcessing, handleReserve }) {
+function MachineCard({
+  machine, handleProcessing, handleReserve, remindMachineId,
+}) {
   const [categoryIndex, setCategoryIndex] = useState(null);
   const [reverveList, setReverveList] = useState([]);
   const totalTime = () => reverveList.reduce((pre, current) => pre + current.category.time, 0);
@@ -142,7 +148,10 @@ function MachineCard({ machine, handleProcessing, handleReserve }) {
   }, [machine.machine_id]);
 
   return (
-    <MachineItem>
+    <MachineItem
+      className={remindMachineId === machine.machine_id ? 'light' : ''}
+      light={remindMachineId === machine.machine_id}
+    >
       <MachineInfo>
         <DefaultIcon>
           {
@@ -177,6 +186,17 @@ function MachineCard({ machine, handleProcessing, handleReserve }) {
         }
       </CategoryWrapper>
       <ButtonWrapper>
+        <Button
+          type="button"
+          onClick={() => {
+            handleReserve(machine.machine_id, categoryIndex);
+            setCategoryIndex('');
+          }}
+          notAllow={!machine.status}
+        >
+          <CalendarToday />
+          預約
+        </Button>
         {
           machine.status === 0
             ? (
@@ -193,17 +213,6 @@ function MachineCard({ machine, handleProcessing, handleReserve }) {
             )
             : <Button type="button" isProcessing>運轉中</Button>
         }
-        <Button
-          type="button"
-          onClick={() => {
-            handleReserve(machine.machine_id, categoryIndex);
-            setCategoryIndex('');
-          }}
-          notAllow={!machine.status}
-        >
-          <CalendarToday />
-          預約
-        </Button>
       </ButtonWrapper>
       <ReserveDiv>
         <span>
@@ -232,4 +241,5 @@ MachineCard.propTypes = {
   }).isRequired,
   handleProcessing: PropTypes.func.isRequired,
   handleReserve: PropTypes.func.isRequired,
+  remindMachineId: PropTypes.string.isRequired,
 };

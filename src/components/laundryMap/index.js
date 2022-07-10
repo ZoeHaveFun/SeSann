@@ -200,11 +200,10 @@ const Icon = styled.span`
   }
 `;
 function MapMarker({ store }) {
-  const [Machines, setMachines] = useState([]);
+  // const [Machines, setMachines] = useState([]);
   const [idleMachines, setIdleMachines] = useState({});
   useEffect(() => {
     const handleMachinessUpdate = (newData) => {
-      setMachines(newData);
       const result = handleIdleMachines(newData);
       setIdleMachines(result);
     };
@@ -233,7 +232,7 @@ function MapMarker({ store }) {
               ? (
                 <Icon type="dry">
                   <Dryer />
-                  {idleMachines.wash.length}
+                  {idleMachines.dry.length}
                 </Icon>
               ) : ''
           }
@@ -242,7 +241,7 @@ function MapMarker({ store }) {
               ? (
                 <Icon type="pet">
                   <Pets />
-                  {idleMachines.wash.length}
+                  {idleMachines.pet.length}
                 </Icon>
               ) : ''
           }
@@ -255,7 +254,7 @@ function MapMarker({ store }) {
 }
 MapMarker.propTypes = {
   store: PropTypes.shape({
-    store_id: PropTypes.number.isRequired,
+    store_id: PropTypes.string.isRequired,
     store_name: PropTypes.string.isRequired,
     location: PropTypes.shape({
       lat: PropTypes.number.isRequired,
@@ -363,7 +362,7 @@ function LaundryMap({ LaundryMapRef }) {
           </Marker>
           {
             storesMarker?.map?.((store) => (
-              <MapMarker store={store} />
+              <MapMarker store={store} key={store.store_id} />
             ))
           }
         </MapContainer>
@@ -375,5 +374,5 @@ function LaundryMap({ LaundryMapRef }) {
 export default LaundryMap;
 
 LaundryMap.propTypes = {
-  LaundryMapRef: PropTypes.func.isRequired,
+  LaundryMapRef: PropTypes.shape({}).isRequired,
 };
