@@ -48,5 +48,5 @@ function UserRegisterForm({ JoinFormRef }) {
 export default UserRegisterForm;
 
 UserRegisterForm.propTypes = {
-  JoinFormRef: PropTypes.func.isRequired,
+  JoinFormRef: PropTypes.shape({}).isRequired,
 };
