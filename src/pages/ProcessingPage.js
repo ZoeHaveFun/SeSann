@@ -1,6 +1,13 @@
 import { useEffect, useState, useContext } from 'react';
+import styled from 'styled-components';
 import { firebaseProcessing, firebaseUsers } from '../utils/firestore';
 import { ProcessinfList } from '../components/List';
+
+const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px 0px;
+`;
 
 function ProcessingPage() {
   const [process, setProcess] = useState([]);
@@ -16,11 +23,11 @@ function ProcessingPage() {
       .then((data) => { setProcess(data); });
   }, [userId]);
   return (
-    <div>
+    <Wrapper>
       {
-         process?.map?.((item) => <ProcessinfList item={item} key={item.process_id} />)
+        process?.map?.((item) => <ProcessinfList item={item} key={item.process_id} />)
       }
-    </div>
+    </Wrapper>
   );
 }
 export default ProcessingPage;
