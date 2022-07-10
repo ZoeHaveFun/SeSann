@@ -1,0 +1,6 @@
+@keyframes remindItemFocus {
+  50%  {box-shadow: 0px 0px 10px #8B8C89;}
+}
+.light {
+  animation: remindItemFocus 1s 3;
+}

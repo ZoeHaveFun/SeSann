@@ -146,7 +146,7 @@ function StoreHeader({ storeInfo, idleMachines }) {
         <h4>{storeInfo.address}</h4>
         <h4>{storeInfo.phone}</h4>
         <CollecIcon
-          like={userInfo.collectIds?.includes(storeInfo.store_id)}
+          like={userInfo?.collectIds?.includes(storeInfo.store_id)}
           onClick={handleCollec}
         />
       </StoreInfo>
@@ -212,7 +212,8 @@ const Tag = styled.span`
 
 function StorePage() {
   const userInfo = useContext(firebaseUsers.AuthContext);
-  const storeId = useLocation().search.split('=')[1];
+  const storeId = useLocation().search.split(/[= ?\s+]/)[2];
+  const remindMachineId = useLocation().search.split(/[= ?\s+]/)[4];
   const [userReserveLists, setUserReserveLists] = useState([]);
   const [storeInfo, setStoreInfo] = useState({});
   const [machines, setMachines] = useState([]);
@@ -293,6 +294,8 @@ function StorePage() {
     if (selectMachine.reserveIds[0] !== undefined
           && checkUserReserved.length === 0
     ) {
+      console.log(selectMachine.reserveIds[0]);
+      console.log(checkUserReserved);
       console.log('你不是下一位餒 乖乖排隊');
       return;
     }
@@ -354,6 +357,7 @@ function StorePage() {
             {filterMachines.length === 0 ? <p>沒有餒~</p>
               : filterMachines.map((item) => (
                 <MachineCard
+                  remindMachineId={remindMachineId}
                   machine={item}
                   key={item.machine_id}
                   handleProcessing={handleProcessing}
