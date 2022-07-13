@@ -14,12 +14,18 @@ import ReservePage from './pages/ReservePage';
 import OrdersPage from './pages/OrdersPage';
 import CollectPage from './pages/CollectPage';
 import './App.css';
-import { firebaseUsers, auth } from './utils/firestore';
+import { firebaseUsers, auth, firebaseProcessing } from './utils/firestore';
+import { initialData } from './utils/reuseFunc';
 
 function App() {
   const { AuthContext } = firebaseUsers;
   const [userInfo, setUserInfo] = useState({});
   const [isSignIn, setIsSignIn] = useState(false);
+  useEffect(() => {
+    firebaseProcessing.getAll()
+      .then((res) => res.map((docc) => docc.data()))
+      .then((data) => { initialData(data); });
+  }, []);
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -47,6 +53,7 @@ function App() {
           <Route path="/store/backstage" element={<Backstage />}>
             <Route index element={<DashboardPage />} />
             <Route path="manage" element={<BackManagePage />} />
+            <Route path="setting" element={<BackManagePage />} />
           </Route>
           <Route path="/user" element={<UserPage />}>
             <Route index element={<InformationPage />} />
