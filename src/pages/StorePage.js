@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import {
   useEffect, useState, useContext,
 } from 'react';
@@ -10,8 +11,9 @@ import { Pets } from '@styled-icons/material-rounded';
 import {
   firebaseMachines, firebaseStores, firebaseProcessing, firebaseReserve, firebaseUsers,
 } from '../utils/firestore';
-import handleIdleMachines from '../utils/reuseFunc';
+import { handleIdleMachines } from '../utils/reuseFunc';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 import MachineCard from '../components/MachineCard';
 import DefaultstoreMainImg from '../style/imgs/storeMainImg.jpg';
 
@@ -77,7 +79,6 @@ const StoreSection = styled.div`
   }
   > span:nth-child(2) {
     background-color: #DDE1E4;
-    /* width: 180px; */
     margin: 4px 0px 0px 10px;
     padding: 1px 8px;
   }
@@ -367,6 +368,7 @@ function StorePage() {
           </MachinesWrapper>
         </Container>
       </Wrapper>
+      <Footer />
     </>
   );
 }
