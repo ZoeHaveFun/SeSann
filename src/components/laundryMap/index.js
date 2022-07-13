@@ -20,7 +20,7 @@ import { Link } from 'react-router-dom';
 import { Pets } from '@styled-icons/material-rounded';
 import { Washer, Dryer } from '@styled-icons/boxicons-solid';
 import { firebaseStores, firebaseMachines } from '../../utils/firestore';
-import handleIdleMachines from '../../utils/reuseFunc';
+import { handleIdleMachines } from '../../utils/reuseFunc';
 import userIcon from '../../style/imgs/location.png';
 import storeIcon from '../../style/imgs/store.png';
 import DistrictData from '../../utils/taiwanDistricts.json';

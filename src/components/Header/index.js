@@ -29,7 +29,7 @@ const Logo = styled.div`
   color: #1C5174;
   & > img {
     width: 46px;
-    margin-right: 20px;
+    margin-right: 10px;
   }
 `;
 const Nav = styled.div`
@@ -137,13 +137,13 @@ function Header() {
       <Link to="/?to=home">
         <Logo>
           <img alt="logo" src={logo} />
-          Mr. Raccoon
+          SéSann 泤衫
         </Logo>
       </Link>
 
       <Nav>
         <Link to="/?to=about">
-          <NavBtn type="button">關於Mr.Raccoon</NavBtn>
+          <NavBtn type="button">關於SéSann</NavBtn>
         </Link>
         <Link to="/?to=map">
           <NavBtn type="button">

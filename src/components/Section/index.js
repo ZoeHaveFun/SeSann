@@ -1,7 +1,9 @@
 import styled from 'styled-components/macro';
 import { PropTypes } from 'prop-types';
-import useWeb from '../../style/imgs/useWeb.jpg';
-import scanQrCode from '../../style/imgs/scanQrCode.png';
+// import useWeb from '../../style/imgs/useWeb.jpg';
+// import scanQrCode from '../../style/imgs/scanQrCode.png';
+import machineStatus from '../../style/imgs/machineStatus.jpg';
+import timeManagement from '../../style/imgs/timeManagement.jpg';
 import laundryMap from '../../style/imgs/laundryMap.jpg';
 import doLaundry from '../../style/imgs/doLaundry.jpg';
 // import loading from '../../style/imgs/loading.gif';
@@ -38,11 +40,11 @@ FirstBanner.propTypes = {
 };
 function SectionA({ AboutRef }) {
   return (
-    <Banner img={laundryMap} ref={AboutRef}>
+    <Banner img={machineStatus} ref={AboutRef}>
       <h1>
-        洗衣地圖
+        即時更新狀態
         <br />
-        搜尋小幫手
+        使用狀況一目了然 不用通靈
       </h1>
     </Banner>
 
@@ -53,11 +55,11 @@ SectionA.propTypes = {
 };
 function SectionB() {
   return (
-    <Banner img={useWeb}>
+    <Banner img={timeManagement}>
       <h1>
         在線預定
         <br />
-        洗衣更從容
+        洗衣更從容 拿回時間掌控
       </h1>
     </Banner>
   );
@@ -65,14 +67,13 @@ function SectionB() {
 
 function SectionC() {
   return (
-    <Banner img={scanQrCode}>
+    <Banner img={laundryMap}>
       <h1>
-        掃碼洗衣
+        洗衣地圖
         <br />
-        快速方便
+        搜尋小幫手
       </h1>
     </Banner>
-
   );
 }
 

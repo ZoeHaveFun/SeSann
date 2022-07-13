@@ -9,6 +9,7 @@ import {
   firebaseUsers, firebaseMachines, firebaseProcessing, firebaseStores,
 } from '../../utils/firestore';
 import DefaultstoreMainImg from '../../style/imgs/storeMainImg.jpg';
+import Loading from '../Loading';
 
 const duration = require('dayjs/plugin/duration');
 
@@ -70,12 +71,16 @@ const TimeLine = styled.div`
     color: #DDE1E4;
   }
   &>span {
-      position: absolute;
-      top: 29px;
-      left: 18px;
-      width: calc(100% - 36px);
-      text-align: center;
-      border-bottom: 2px #DDE1E4 solid;
+    position: absolute;
+    top: 24px;
+    left: 18px;
+    width: calc(100% - 36px);
+    text-align: center;
+    border-bottom: 2px #DDE1E4 solid;
+    span {
+      display: block;
+      margin-bottom: 4px;
+    }
   }
 `;
 const TimeDiv = styled.div`
@@ -227,7 +232,7 @@ export function ReserveList({ item, CancelReserve }) {
 
 export function ProcessinfList({ item }) {
   const userInfo = useContext(firebaseUsers.AuthContext);
-  const [countDown, setCountDown] = useState();
+  const [countDown, setCountDown] = useState('');
 
   useEffect(() => {
     const finishedInStore = (orderData) => {
@@ -284,7 +289,11 @@ export function ProcessinfList({ item }) {
         </StartDiv>
         <TimeLine>
           <Album />
-          <span>{`${countDown} m`}</span>
+          <span>
+            {/* <Loading /> */}
+            { countDown ? <span>{`${countDown} m`}</span>
+              : <Loading />}
+          </span>
           <Adjust />
         </TimeLine>
         <EndDiv>

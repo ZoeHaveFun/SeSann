@@ -98,7 +98,7 @@ function Login() {
           <Link to="/">
             <Logo>
               <img alt="logo" src={logo} />
-              Mr. Raccoon
+              SéSann 泤衫
             </Logo>
           </Link>
           <p>
