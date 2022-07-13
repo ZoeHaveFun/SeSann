@@ -1,21 +1,20 @@
-/* eslint-disable react/no-array-index-key */
 import {
   useEffect, useContext, useState,
 } from 'react';
-import { PropTypes } from 'prop-types';
 import styled from 'styled-components/macro';
 import ReactSelect from 'react-select';
 import axios from 'axios';
-import dayjs from 'dayjs';
 import { map } from 'ramda';
 import {
-  ModeEdit, Check, InsertChartOutlined, SettingsSuggest, Face, MonetizationOn,
+  ModeEdit, Check, InsertChartOutlined, SettingsSuggest, Face, MonetizationOn, LocalLaundryService,
 } from '@styled-icons/material-rounded';
-import { Outlet, Link } from 'react-router-dom';
-import { firebaseStores, firebaseUsers, firebaseMachines } from '../utils/firestore';
+import { Outlet, Link, useLocation } from 'react-router-dom';
+import dayjs from 'dayjs';
+import { firebaseStores, firebaseUsers } from '../utils/firestore';
 import Header from '../components/Header';
-import AddMachineForm from '../components/AddMachineForm';
+import Footer from '../components/Footer';
 import storeMainImg from '../style/imgs/storeMainImg.jpg';
+import { totalCustomerRecord, totalIncomeRecord } from '../utils/reuseFunc';
 
 const duration = require('dayjs/plugin/duration');
 
@@ -24,117 +23,6 @@ dayjs.extend(duration);
 const Wrapper = styled.div`
   padding-top: 80px;
 `;
-const ButtonWrapper = styled.div`
-  display: flex;
-  & > button {
-    border: 1px #001c55 solid;
-    cursor: pointer;
-    padding: 4px 10px;
-    border-radius: 0.8rem;
-    margin: 10px 8px;
-  }
-`;
-const MachineWrapper = styled.div`
-  display: flex;
-  padding: 10px 20px;
-  margin: 10px 20px;
-  border-bottom: 1px #333 solid;
-  align-items: flex-start;
-  flex-direction: column;
-`;
-// const Button = styled.button`
-//   border-radius: 0.5rem;
-//   cursor: ${(props) => (props.isProcessing || props.notAllow ? 'not-allowed' : 'pointer')};
-//   &:hover{
-//     box-shadow: 0px 0px 4px #999;
-//   }
-// `;
-// const CategoryBtn = styled(Button)`
-//   padding: 4px 8px;
-//   flex: 1;
-//   height: 40px;
-//   border: ${(props) => (props.isSelected ? '4px #666 solid' : '1px #999 solid')};
-// `;
-const CategoryWrapper = styled.div`
-  margin: 0px 40px 0px 20px;
-  width: 600px;
-  display: flex;
-  flex-direction: column;
-  /* gap: 20px; */
-`;
-const Category = styled.div`
-  margin: 8px 0px;
-`;
-
-function MachineCard({ machine }) {
-  const [edit, setEdit] = useState(false);
-  const [machineName, setMachineName] = useState(machine.machine_name);
-  const [categorys, setCategorys] = useState(machine.categorys);
-  const handleCategoryChange = (e, index) => {
-    const objKey = e.target.name;
-    const newData = [...categorys];
-    if (objKey === 'name') {
-      newData[index].name = e.target.value;
-    }
-    if (objKey === 'price') {
-      newData[index].price = Number(e.target.value);
-    }
-    if (objKey === 'time') {
-      newData[index].time = Number(e.target.value);
-    }
-    setCategorys(newData);
-  };
-  const deletMachine = () => {
-    firebaseMachines.delet(machine.machine_id);
-  };
-  const handleMachineEdit = () => {
-    if (!edit) {
-      setEdit(!edit);
-      return;
-    }
-    const newData = { ...machine };
-    newData.machine_name = machineName;
-    newData.categorys = categorys;
-    firebaseMachines.updateData(machine.machine_id, newData);
-    setEdit(!edit);
-  };
-
-  return (
-    <MachineWrapper>
-      <label htmlFor="machineName">
-        機台名稱:
-        <input type="text" name="machineName" value={machineName} disabled={!edit} onChange={(e) => { setMachineName(e.target.value); }} />
-      </label>
-      <label htmlFor="machineType">
-        類型:
-        <input type="text" name="machineType" value={machine.type} disabled />
-      </label>
-      <CategoryWrapper>
-        {
-          categorys.map((category, index) => (
-            <Category key={index}>
-              <label htmlFor="name">
-                <input type="text" name="name" value={category.name} disabled={!edit} onChange={(e) => { handleCategoryChange(e, index); }} />
-              </label>
-              <label htmlFor="time">
-                <input type="text" name="time" value={category.time} disabled={!edit} onChange={(e) => { handleCategoryChange(e, index); }} />
-                分鐘
-              </label>
-              <label htmlFor="price">
-                <input type="text" name="price" value={category.price} disabled={!edit} onChange={(e) => { handleCategoryChange(e, index); }} />
-                元
-              </label>
-            </Category>
-          ))
-        }
-      </CategoryWrapper>
-      <ButtonWrapper>
-        <button type="button" onClick={() => { handleMachineEdit(); }}>{edit ? '完成' : '編輯'}</button>
-        <button type="button" onClick={deletMachine}>刪除</button>
-      </ButtonWrapper>
-    </MachineWrapper>
-  );
-}
 
 const TitleWrpper = styled.div`
   position: absolute;
@@ -145,7 +33,7 @@ const TitleWrpper = styled.div`
   background-image: linear-gradient(to bottom, #327CA7, #FEFCFB);
 `;
 const Title = styled.div`
-  z-index: 10;
+  z-index: 9;
   display: flex;
   align-items: center;
   width: 80%;
@@ -349,10 +237,12 @@ const Icon = styled.span`
 function Backstage() {
   const userInfo = useContext(firebaseUsers.AuthContext);
   const userId = userInfo.user_id;
+  const pathArray = useLocation().pathname.split('/');
+  const currentTag = pathArray[pathArray.length - 1];
+  const { CurrentStoreIdContext } = firebaseStores;
   const [userStores, setUserStores] = useState([]);
   const [storeData, setStoreData] = useState('');
   const [selectStore, setSelectStore] = useState('');
-  const [machines, setMachines] = useState([]);
   const [edit, setEdit] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const geoKey = 'AIzaSyAKvX91_wrPBCvJUcPDFCVF18upOWq7GdM';
@@ -360,15 +250,10 @@ function Backstage() {
   const myStores = () => map((storeItem) => (
     { value: storeItem.store_id, label: storeItem.store_name }
   ), userStores);
-  const updateMachines = (newData) => {
-    setMachines(newData);
-  };
   const handleSelectChange = async (e) => {
     setSelectStore(e);
     const data = await firebaseStores.getOne(e.value);
     setStoreData(data);
-
-    return firebaseMachines.onMachinesShot(e.value, 'store_id', updateMachines);
   };
   const changeStoreData = (e) => {
     const newData = { ...storeData };
@@ -407,33 +292,15 @@ function Backstage() {
     firebaseStores.updateData(storeData.store_id, storeData);
     setEdit(!edit);
   };
-  const handleCustomerRecord = (days) => {
-    let customer;
-    if (days === undefined) {
-      customer = storeData.order_record.length;
-    }
-    if (days === 1) {
-      const toddayRecord = storeData.order_record.filter((record) => dayjs(record.start_time.seconds * 1000).format('YYYYMMDD') === dayjs().format('YYYYMMDD'));
-      customer = toddayRecord.length;
-    }
-    return customer;
-  };
-  const handleIncomeRecord = (days) => {
-    let income;
-    if (days === undefined) {
-      income = storeData.order_record.reduce((accu, curr) => accu + curr.category.price, 0);
-    }
-    if (days === 1) {
-      const toddayRecord = storeData.order_record.filter((record) => dayjs(record.start_time.seconds * 1000).format('YYYYMMDD') === dayjs().format('YYYYMMDD'));
-      income = toddayRecord.reduce((accu, curr) => accu + curr.category.price, 0);
-    }
-    return income;
-  };
+
   useEffect(() => {
     firebaseStores.getQuery(userId, 'user_id')
       .then((res) => res.map((docc) => docc.data()))
-      .then((data) => {
+      .then(async (data) => {
         setUserStores(data);
+        setSelectStore({ value: data[0].store_id, label: data[0].store_name });
+        const newData = await firebaseStores.getOne(data[0].store_id);
+        setStoreData(newData);
       });
   }, [userId]);
   return (
@@ -483,11 +350,11 @@ function Backstage() {
                     TODAY :
                     <CustomerInform>
                       <Face />
-                      {handleCustomerRecord(1)}
+                      {totalCustomerRecord(1, storeData)}
                     </CustomerInform>
                     <IncomeInform>
                       <MonetizationOn />
-                      {handleIncomeRecord(1)}
+                      {totalIncomeRecord(1, storeData)}
                     </IncomeInform>
                   </>
                 ) : ''
@@ -496,69 +363,33 @@ function Backstage() {
           </StoreHeader>
           <MainContain>
             <TabBar>
-              <Button to="/store/backstage">
+              <Button to="/store/backstage/manage" isSelect={currentTag === 'manage'}>
+                <Icon>
+                  <LocalLaundryService />
+                </Icon>
+                管理
+              </Button>
+              <Button to="/store/backstage" isSelect={currentTag === 'backstage'}>
                 <Icon bigger>
                   <InsertChartOutlined />
                 </Icon>
               </Button>
-              <Button to="/store/backstage/manage">
+              <Button to="/store/backstage/setting" isSelect={currentTag === 'setting'}>
                 <Icon>
                   <SettingsSuggest />
                 </Icon>
+                設定
               </Button>
             </TabBar>
-            <Outlet storeData={storeData} />
+            <CurrentStoreIdContext.Provider value={selectStore.value}>
+              <Outlet />
+            </CurrentStoreIdContext.Provider>
           </MainContain>
         </Container>
-        {
-            storeData ? (
-              <div>
-                <span>
-                  今日來客數:
-                  {handleCustomerRecord(1)}
-                </span>
-                <span>
-                  今日營業額:
-                  {handleIncomeRecord(1)}
-                </span>
-                <span>
-                  累積來客數:
-                  {handleCustomerRecord()}
-                </span>
-                <span>
-                  累積營業額:
-                  {handleIncomeRecord()}
-                </span>
-              </div>
-            ) : ''
-          }
-        {
-          storeData ? <AddMachineForm storeId={storeData.store_id} /> : ''
-        }
-        {
-          storeData && machines.length === 0 ? <h2>老闆你這家店還沒機台餒</h2>
-            : machines?.map?.(
-              (machine) => <MachineCard machine={machine} key={machine.machine_id} />,
-            )
-        }
       </Wrapper>
+      <Footer />
     </>
 
   );
 }
 export default Backstage;
-
-MachineCard.propTypes = {
-  machine: PropTypes.shape({
-    machine_id: PropTypes.string.isRequired,
-    machine_name: PropTypes.string.isRequired,
-    status: PropTypes.number.isRequired,
-    store_id: PropTypes.string.isRequired,
-    type: PropTypes.string.isRequired,
-    categorys: PropTypes.arrayOf(PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      price: PropTypes.number.isRequired,
-      time: PropTypes.number.isRequired,
-    })).isRequired,
-  }).isRequired,
-};
