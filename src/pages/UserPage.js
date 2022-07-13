@@ -3,11 +3,12 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import dayjs from 'dayjs';
 import {
-  SettingsPower, CalendarToday, Inventory, PersonPin, ModeEdit, Check, MonetizationOn,
+  SettingsPower, CalendarToday, Inventory, ModeEdit, Check, MonetizationOn, Message,
 } from '@styled-icons/material-rounded';
 import { HeartCircle } from '@styled-icons/boxicons-solid';
 import { firebaseUsers } from '../utils/firestore';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 import user1 from '../style/imgs/userImgs/1.png';
 
 const duration = require('dayjs/plugin/duration');
@@ -18,6 +19,7 @@ const Wrapper = styled.div`
   height: 100vh;
   padding: 80px 0px 0px;
   position: relative;
+  margin-bottom: 50px;
 `;
 const TitleWrpper = styled.div`
   position: absolute;
@@ -128,8 +130,6 @@ const UserImg = styled.img`
   margin-right: 14px;
   box-shadow: 0px 0px 2px #999;
 `;
-// const ImgContain = styled.div`
-// `;
 const MainContain = styled.div`
   width: 100%;
 `;
@@ -196,11 +196,6 @@ function UserPage() {
         <Container>
           <UserHeader>
             <Left>
-              {/* <ImgContain>
-                <OverLay>
-
-                </OverLay>
-              </ImgContain> */}
               <UserImg src={user1} />
               <UserInfo isEdit={edit}>
                 <label htmlFor="userName">
@@ -246,7 +241,7 @@ function UserPage() {
               </Button>
               <Button to="/user" isSelect={currentTag === 'user'}>
                 <Icon bigger>
-                  <PersonPin />
+                  <Message />
                 </Icon>
               </Button>
               <Button to="/user/orders" isSelect={currentTag === 'orders'}>
@@ -265,9 +260,8 @@ function UserPage() {
             <Outlet />
           </MainContain>
         </Container>
-
       </Wrapper>
-
+      <Footer />
     </>
   );
 }
