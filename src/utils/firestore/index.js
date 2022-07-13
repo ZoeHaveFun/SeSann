@@ -88,6 +88,7 @@ export const firebaseUsers = {
 
 export const firebaseStores = {
   tableName: 'Stores',
+  CurrentStoreIdContext: createContext(),
   post(postData) {
     const data = doc(collection(db, this.tableName));
     setDoc(data, { ...postData, store_id: data.id });
@@ -99,6 +100,12 @@ export const firebaseStores = {
       data.forEach((item) => {
         newData.push(item.data());
       });
+      callback(newData);
+    });
+  },
+  onOneStoreShot(storeId, callback) {
+    return onSnapshot(doc(db, this.tableName, storeId), (info) => {
+      const newData = info.data();
       callback(newData);
     });
   },
@@ -220,6 +227,10 @@ export const firebaseProcessing = {
       });
       callback(newData);
     });
+  },
+  async getAll() {
+    const data = await getDocs(collection(db, this.tableName));
+    return data.docs;
   },
   async getQuery(Id, key) {
     const q = query(collection(db, this.tableName), where(key, '==', Id));
