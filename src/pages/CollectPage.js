@@ -6,7 +6,7 @@ import { Washer, Dryer } from '@styled-icons/boxicons-solid';
 import { Pets } from '@styled-icons/material-rounded';
 import { firebaseUsers, firebaseStores, firebaseMachines } from '../utils/firestore';
 import DefaultstoreMainImg from '../style/imgs/storeMainImg.jpg';
-import handleIdleMachines from '../utils/reuseFunc';
+import { handleIdleMachines } from '../utils/reuseFunc';
 
 const CardWrapper = styled.div`
   width: calc(100% / 3 - 20px);
