@@ -4,12 +4,6 @@ import './index.css';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import NotoSansTCBold from './style/fonts/NotoSansTC-Bold.otf';
-import NotoSansTCLight from './style/fonts/NotoSansTC-Light.otf';
-import NotoSansTCRegular from './style/fonts/NotoSansTC-Regular.otf';
-import RobotoBold from './style/fonts/Roboto-Bold.ttf';
-import RobotoCLight from './style/fonts/Roboto-Light.ttf';
-import RobotoRegular from './style/fonts/Roboto-Regular.ttf';
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -19,32 +13,6 @@ const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
     outline: transparent;
     position: relative;
-    
-    /* font-family setting */
-    @font-face {
-      font-family: NotoSansTC-Bold;
-      src: url(${NotoSansTCBold}) format('truetype');
-    }
-    @font-face {
-      font-family: NotoSansTC-Regular;
-      src: url(${NotoSansTCRegular}) format('truetype');
-    }
-    @font-face {
-      font-family: NotoSansTC-Light;
-      src: url(${NotoSansTCLight}) format('truetype');
-    }
-    @font-face {
-      font-family: Roboto-Bold;
-      src: url(${RobotoBold}) format('truetype');
-    }
-    @font-face {
-      font-family: Roboto-Regular;
-      src: url(${RobotoRegular}) format('truetype');
-    }
-    @font-face {
-      font-family: Roboto-Light;
-      src: url(${RobotoCLight}) format('truetype');
-    }
   }
   button {
     background-color: transparent;
