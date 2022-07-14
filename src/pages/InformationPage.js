@@ -6,6 +6,7 @@ import styled from 'styled-components/macro';
 import { MonetizationOn, AccessTime } from '@styled-icons/material-rounded';
 import { firebaseUsers, firebaseReserve, firebaseMachines } from '../utils/firestore';
 import DefaultstoreMainImg from '../style/imgs/storeMainImg.jpg';
+import Loading from '../components/Loading';
 
 const duration = require('dayjs/plugin/duration');
 
@@ -73,8 +74,9 @@ const Right = styled.div`
   padding: 0px 20px;
   border-left: 1px #DDE1E4 solid;
   border-right: 1px #DDE1E4 solid;
-  &>span {
+  span {
     font-size: 20px;
+    padding-top: 5px;
   }
 `;
 const ReserveDetail = styled.div`
@@ -157,7 +159,10 @@ function RemindCard({ remind, CancelReserve }) {
         </Left>
         <Right>
           預約保留時間
-          <span>{countDown}</span>
+          <span>
+            { countDown ? <span>{`${countDown} m`}</span>
+              : <Loading />}
+          </span>
         </Right>
       </Container>
       <ButtonWrapper>
