@@ -13,6 +13,7 @@ import ProcessingPage from './pages/ProcessingPage';
 import ReservePage from './pages/ReservePage';
 import OrdersPage from './pages/OrdersPage';
 import CollectPage from './pages/CollectPage';
+import PageNotFound from './pages/ErroePage';
 import './App.css';
 import { firebaseUsers, auth, firebaseProcessing } from './utils/firestore';
 import { initialData } from './utils/reuseFunc';
@@ -62,6 +63,7 @@ function App() {
             <Route path="orders" element={<OrdersPage />} />
             <Route path="collect" element={<CollectPage />} />
           </Route>
+          <Route path="*" element={<PageNotFound />} />
         </Routes>
       </BrowserRouter>
     </AuthContext.Provider>
