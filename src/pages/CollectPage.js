@@ -105,7 +105,15 @@ const Wrapper = styled.div`
   flex-wrap: wrap;
 
 `;
-
+const Message = styled.h3`
+  width: 100%;
+  box-shadow: 0px 0px 8px #e7ecef;
+  border-radius: 0.8rem;
+  padding: 20px 0px;
+  color: #bec5c9;
+  text-align: center;
+  font-size: 18px;
+`;
 function CollectPage() {
   const userInfo = useContext(firebaseUsers.AuthContext);
   const [collectStores, setCollectStores] = useState([]);
@@ -117,7 +125,16 @@ function CollectPage() {
   return (
     <Wrapper>
       {
-         collectStores?.map?.((store) => <CollectCard storeInfo={store} key={store.store_id} />)
+        collectStores.length === 0 ? (
+          <Message>
+            “洗衣服，我懶，洗頭，我懶”
+            <br />
+            “但是”
+            <br />
+            “喜歡你，我很勤快”
+          </Message>
+        )
+          : collectStores?.map?.((store) => <CollectCard storeInfo={store} key={store.store_id} />)
       }
     </Wrapper>
   );
