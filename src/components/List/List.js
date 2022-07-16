@@ -255,10 +255,13 @@ export function ProcessinfList({ item }) {
       orderData.end_time = item.end_time;
       orderData.store_id = item.store_id;
       orderData.store_name = item.store_name;
+      orderData.process_id = item.process_id;
 
       const newOrders = [...userInfo.orders, orderData];
+      const newRecords = [...userInfo.records, orderData];
       finishedInStore(orderData);
       firebaseUsers.addOrders(userInfo.user_id, newOrders);
+      firebaseUsers.updateRecords(userInfo.user_id, newRecords);
       firebaseProcessing.delet(item.process_id);
       firebaseMachines.updateStatus(item.machine_id, 0);
     };
