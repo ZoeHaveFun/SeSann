@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { PropTypes } from 'prop-types';
 import styled from 'styled-components/macro';
 import { MonetizationOn, AccessTime } from '@styled-icons/material-rounded';
+import Swal from 'sweetalert2';
 import { firebaseUsers, firebaseReserve, firebaseMachines } from '../utils/firestore';
 import DefaultstoreMainImg from '../style/imgs/storeMainImg.jpg';
 import Loading from '../components/Loading';
@@ -336,13 +337,31 @@ function InformationPage() {
   const [records, setRecords] = useState([]);
 
   const CancelReserve = async (machineId, reserveId) => {
-    const reserveMachineData = await firebaseMachines.getOne(machineId);
-    const newReserveIds = reserveMachineData.reserveIds.filter((id) => id !== reserveId);
-    const newRemids = reminds.filter((item) => item.reserve_id !== reserveId);
+    Swal.fire({
+      title: '確定要取消預約嗎?',
+      icon: 'warning',
+      showCancelButton: true,
+      customClass: {
+        popup: 'secondReserve',
+      },
+      cancelButtonText: '我再想想',
+      confirmButtonText: '是的,我要取消',
+      confirmButtonColor: '#b64a41',
+    }).then(async (result) => {
+      if (result.isConfirmed === false) return;
+      const reserveMachineData = await firebaseMachines.getOne(machineId);
+      const newReserveIds = reserveMachineData.reserveIds.filter((id) => id !== reserveId);
+      const newRemids = reminds.filter((item) => item.reserve_id !== reserveId);
 
-    firebaseMachines.updateReserveIds(machineId, newReserveIds);
-    firebaseReserve.delet(reserveId);
-    setReminds(newRemids);
+      firebaseMachines.updateReserveIds(machineId, newReserveIds);
+      firebaseReserve.delet(reserveId);
+      setReminds(newRemids);
+      Swal.fire(
+        '您已取消預約囉',
+        '可以到預約中查看預約狀態',
+        'success',
+      );
+    });
   };
   const deletRecord = (id) => {
     const data = [...records];
