@@ -4,6 +4,7 @@ import styled from 'styled-components/macro';
 import { firebaseUsers } from '../utils/firestore';
 import logo from '../style/imgs/raccoon.svg';
 import laundryday from '../style/imgs/laundryday.jpg';
+import { Toast } from '../components/Alert';
 
 const Logo = styled.div`
   display: flex;
@@ -84,6 +85,10 @@ function Login() {
       loginPassword.current.value,
     );
     if (result.user) {
+      Toast.fire({
+        icon: 'success',
+        title: '您已登入',
+      });
       navegate('/', { replace: true });
       loginEmail.current.value = '';
       loginPassword.current.value = '';
