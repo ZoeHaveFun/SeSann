@@ -3,11 +3,11 @@ import { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import {
-  Menu, QrCode, LocalLaundryService, Map,
+  Menu, LocalLaundryService, Map,
 } from '@styled-icons/material-rounded';
 import { firebaseUsers } from '../../utils/firestore';
 import logo from '../../style/imgs/raccoon.svg';
-import userImgDefault from '../../style/imgs/userImgDefault.jpg';
+import userImgDefault from '../../style/imgs/userImgs/5.png';
 
 const HeaderWrapper = styled.div`
   z-index: 10;
@@ -72,7 +72,7 @@ const Login = styled.button`
   }
 `;
 const BurgerWarpper = styled.div`
-  padding: 10px 20px;
+  padding: 10px 16px;
   box-shadow: 0px 0px 4px #0a1128;
   border-radius: 0.8rem;
   background-color: #fefcfb;
@@ -81,26 +81,49 @@ const BurgerWarpper = styled.div`
 `;
 const MenuIcon = styled(Menu)`
   width: 30px;
-  margin-right: 8px;
   transform: ${(props) => (props.click ? 'rotate(90deg)' : 'rotate(0deg)')};
   cursor: pointer;
   transition: all 0.3s;
   z-index: 9;
 `;
 const MenuWrapper = styled.div`
+  width: 110px;
   position: absolute;
   display: flex;
   flex-direction: column;
-  top: ${(props) => (props.open ? '60px' : '0px')};
-  left: 0px;
+  /* top: ${(props) => (props.open ? '80px' : '0px')};
+  right: 0px; */
+  top: 80px;
+  right: ${(props) => (props.open ? '0px' : '-140px')};
   opacity: ${(props) => (props.open ? '1' : '0')};
   background-color: #fefcfb;
   box-shadow: 0px 0px 4px #0a1128;
   border-radius: 0.8rem;
   padding: 10px 20px;
   transition: all 0.3s;
+`;
+const TopWrapper = styled.div`
+  display: flex;
+  flex-direction: column; 
+  border-bottom: 1px #E7ECEF solid;
+  padding-bottom: 5px;
   & span {
-    padding:4px 0px ;
+    display: block;
+    padding:1px 0px ;
+    color: #0a1128;
+    cursor: pointer;
+    &:hover {
+      color: #ff9f1c;
+    }
+  }
+`;
+const BottomWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding-top: 4px;
+  & span {
+    display: block;
+    padding:2px 0px ;
     color: #0a1128;
     cursor: pointer;
     &:hover {
@@ -110,7 +133,7 @@ const MenuWrapper = styled.div`
   & button {
     font-family: 'Noto Sans TC', sans-serif;
     font-size: 16px;
-    padding:4px 0px ;
+    padding:2px 0px ;
     text-align: start;
     color: #0a1128;
     cursor: pointer;
@@ -121,6 +144,10 @@ const MenuWrapper = styled.div`
 `;
 const UserImg = styled.img`
   width: 30px;
+  object-fit: cover;
+  margin-right: 10px;
+  border-radius: 50%;
+  box-shadow: 0px 0px 2px #999;
 `;
 
 function Header() {
@@ -131,10 +158,9 @@ function Header() {
     firebaseUsers.signOut();
     navegate('/', { replace: true });
   };
-
   return (
     <HeaderWrapper>
-      <Link to="/?to=home">
+      <Link to="/">
         <Logo>
           <img alt="logo" src={logo} />
           SéSann 泤衫
@@ -151,10 +177,6 @@ function Header() {
             <Icon><Map /></Icon>
           </NavBtn>
         </Link>
-        <NavBtn type="button">
-          掃一掃
-          <Icon><QrCode /></Icon>
-        </NavBtn>
         <Link to="/?to=join">
           <NavBtn type="button">
             我要加入
@@ -170,16 +192,19 @@ function Header() {
             )
             : (
               <BurgerWarpper>
-                <MenuIcon onClick={() => serMenuOpen(!menuOpen)} click={menuOpen} />
+                <UserImg src={userImgDefault} />
                 <MenuWrapper open={menuOpen}>
-                  <Link to="/user/processing"><span>進行中</span></Link>
-                  <Link to="/user/reserve"><span>預約中</span></Link>
-                  <Link to="/user/orders"><span>全部訂單</span></Link>
-                  <br />
-                  <Link to="/user">
-                    <span>我的帳戶</span>
-                  </Link>
-                  {
+                  <TopWrapper>
+                    <Link to="/user/processing"><span>進行中</span></Link>
+                    <Link to="/user/reserve"><span>預約中</span></Link>
+                    <Link to="/user/orders"><span>全部訂單</span></Link>
+                    <Link to="/user/collect"><span>收藏店家</span></Link>
+                  </TopWrapper>
+                  <BottomWrapper>
+                    <Link to="/user">
+                      <span>我的帳戶</span>
+                    </Link>
+                    {
                     userInfo.storeIds?.length !== 0
                       ? (
                         <Link to="/store/backstage">
@@ -187,9 +212,10 @@ function Header() {
                         </Link>
                       ) : ('')
                   }
-                  <button type="button" onClick={Logout}>登出</button>
+                    <button type="button" onClick={Logout}>登出</button>
+                  </BottomWrapper>
                 </MenuWrapper>
-                <UserImg src={userImgDefault} />
+                <MenuIcon onClick={() => serMenuOpen(!menuOpen)} click={menuOpen} />
               </BurgerWarpper>
             )
         }
