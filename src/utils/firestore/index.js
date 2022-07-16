@@ -9,6 +9,7 @@ import {
   updateDoc, deleteDoc,
 } from 'firebase/firestore';
 import { createContext } from 'react';
+import { Toast } from '../../components/Alert';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_APIKEY,
@@ -33,6 +34,7 @@ export const firebaseUsers = {
       user_name: name,
       points: 1000,
       orders: [],
+      records: [],
       storeIds: [],
       collectIds: [],
     });
@@ -47,7 +49,10 @@ export const firebaseUsers = {
   },
   signOut() {
     signOut(auth).then(() => {
-      console.log('你O U T');
+      Toast.fire({
+        icon: 'success',
+        title: '您已登出',
+      });
     });
   },
   onUserShot(userId, callback) {
@@ -83,6 +88,11 @@ export const firebaseUsers = {
   updateCollectIds(UserId, newData) {
     updateDoc(doc(db, this.tableName, UserId), {
       collectIds: newData,
+    });
+  },
+  updateRecords(UserId, newData) {
+    updateDoc(doc(db, this.tableName, UserId), {
+      records: newData,
     });
   },
 };
@@ -187,6 +197,10 @@ export const firebaseReserve = {
     const data = doc(collection(db, this.tableName));
     setDoc(data, { ...postData, reserve_id: data.id });
     return data.id;
+  },
+  async getAll() {
+    const data = await getDocs(collection(db, this.tableName));
+    return data.docs;
   },
   onReserveShot(Id, key, callback) {
     const q = query(collection(db, this.tableName), where(key, '==', Id));

@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import dayjs from 'dayjs';
 import {
-  firebaseUsers, firebaseMachines, firebaseProcessing, firebaseStores,
+  firebaseUsers, firebaseMachines, firebaseProcessing, firebaseStores, firebaseReserve,
 } from '../firestore';
 
 const duration = require('dayjs/plugin/duration');
@@ -25,9 +25,13 @@ const writeInUserOrders = async (list) => {
   orderData.end_time = list.end_time;
   orderData.store_id = list.store_id;
   orderData.store_name = list.store_name;
+  orderData.process_id = list.process_id;
 
   const newOrders = [...userInfo.orders, orderData];
+  const newRecords = [...userInfo.records, orderData];
+
   firebaseUsers.addOrders(userInfo.user_id, newOrders);
+  firebaseUsers.updateRecords(userInfo.user_id, newRecords);
 
   writeInStoreOrderRecord(userInfo.user_id, orderData);
 };
@@ -40,23 +44,62 @@ const archiveOrder = (data) => {
   });
 };
 
-export const initialData = async (data) => {
+const finishedProcessing = async (data) => {
   const finishedYMDH = await data.filter((list) => (
     (Number(dayjs(list.end_time.seconds * 1000).format('YYYY')) <= Number(dayjs().format('YYYY')))
-    && (Number(dayjs(list.end_time.seconds * 1000).format('MM')) <= Number(dayjs().format('MM')))
-    && (Number(dayjs(list.end_time.seconds * 1000).format('DD')) <= Number(dayjs().format('DD')))
-    && (Number(dayjs(list.end_time.seconds * 1000).format('HH')) <= Number(dayjs().format('HH')))
+    || (Number(dayjs(list.end_time.seconds * 1000).format('MM')) <= Number(dayjs().format('MM')))
+    || (Number(dayjs(list.end_time.seconds * 1000).format('DD')) <= Number(dayjs().format('DD')))
+    || (Number(dayjs(list.end_time.seconds * 1000).format('HH')) <= Number(dayjs().format('HH')))
   ));
-  // console.log(finishedYMDH);
-
-  // finishedYMDH.forEach((list) => {
-  //   console.log(Number(dayjs(list.end_time.seconds * 1000).format('mm')));
-  // });
-  // console.log('NOW', Number(dayjs().format('mm')));
-
   const finishedData = finishedYMDH.filter((list) => Number(dayjs(list.end_time.seconds * 1000).format('mm')) <= Number(dayjs().format('mm')));
 
   archiveOrder(finishedData);
+};
+
+const resetMachineReserve = async (list) => {
+  const machineInfo = await firebaseMachines.getOne(list.machine_id);
+  const newReserveIds = machineInfo.reserveIds.filter((id) => id !== list.reserve_id);
+
+  firebaseMachines.updateReserveIds(list.machine_id, newReserveIds);
+  firebaseReserve.delet(list.reserve_id);
+};
+const writeInUserRecords = async (list) => {
+  const userInfo = await firebaseUsers.get(list.user_id);
+  const recordData = {};
+
+  recordData.category = list.category;
+  recordData.machine_id = list.machine_id;
+  recordData.machine_name = list.machine_name;
+  recordData.store_id = list.store_id;
+  recordData.store_name = list.store_name;
+  recordData.reserve_id = list.reserve_id;
+  recordData.reserve_time = list.reserve_time;
+  recordData.estimate_startTime = list.estimate_startTime;
+
+  const newRecords = [...userInfo.records, recordData];
+
+  firebaseUsers.updateRecords(userInfo.user_id, newRecords);
+};
+const archiveReserve = (data) => {
+  data.forEach((list) => {
+    writeInUserRecords(list);
+    resetMachineReserve(list);
+  });
+};
+const expiredReserve = async (data) => {
+  const finishedYMDH = await data.filter((list) => (
+    (Number(dayjs(list.estimate_startTime.seconds * 1000).format('YYYY')) <= Number(dayjs().format('YYYY')))
+    || (Number(dayjs(list.estimate_startTime.seconds * 1000).format('MM')) <= Number(dayjs().format('MM')))
+    || (Number(dayjs(list.estimate_startTime.seconds * 1000).format('DD')) <= Number(dayjs().format('DD')))
+    || (Number(dayjs(list.estimate_startTime.seconds * 1000).format('HH')) <= Number(dayjs().format('HH')))
+  ));
+  const finishedData = finishedYMDH.filter((list) => Number(dayjs(list.estimate_startTime.seconds * 1000).format('mm')) <= Number(dayjs().format('mm')));
+
+  archiveReserve(finishedData);
+};
+export const initialData = async (type, data) => {
+  if (type === 'processing') { finishedProcessing(data); }
+  if (type === 'reserve') { expiredReserve(data); }
 };
 
 export const handleIdleMachines = (machines) => {
