@@ -1,3 +1,4 @@
+/* eslint-disable func-names */
 /* eslint-disable no-mixed-operators */
 /* eslint-disable no-use-before-define */
 /* eslint-disable new-cap */
