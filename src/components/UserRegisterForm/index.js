@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import styled from 'styled-components/macro';
 import { PropTypes } from 'prop-types';
 import { firebaseUsers } from '../../utils/firestore';
+import { Toast } from '../Alert';
 
 const Wrapper = styled.div`
   margin: auto;
@@ -98,6 +99,11 @@ function UserRegisterForm({ JoinFormRef }) {
     registerName.current.value = '';
     registerEmail.current.value = '';
     registerPassword.current.value = '';
+
+    Toast.fire({
+      icon: 'success',
+      title: '註冊成功',
+    });
   };
   return (
     <Wrapper ref={JoinFormRef}>

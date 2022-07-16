@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-console */
 import {
   useEffect, useState, useContext,
@@ -8,6 +9,7 @@ import styled from 'styled-components/macro';
 import dayjs from 'dayjs';
 import { Washer, Dryer, HeartCircle } from '@styled-icons/boxicons-solid';
 import { Pets } from '@styled-icons/material-rounded';
+import Swal from 'sweetalert2';
 import {
   firebaseMachines, firebaseStores, firebaseProcessing, firebaseReserve, firebaseUsers,
 } from '../utils/firestore';
@@ -16,6 +18,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import MachineCard from '../components/MachineCard';
 import DefaultstoreMainImg from '../style/imgs/storeMainImg.jpg';
+import { Toast } from '../components/Alert';
 
 const duration = require('dayjs/plugin/duration');
 
@@ -127,6 +130,14 @@ const CollecIcon = styled(HeartCircle)`
 function StoreHeader({ storeInfo, idleMachines }) {
   const userInfo = useContext(firebaseUsers.AuthContext);
   const handleCollec = () => {
+    if (!userInfo) {
+      Toast.fire({
+        icon: 'warning',
+        title: '請先登入喔',
+      });
+      return;
+    }
+
     if (!userInfo.collectIds.includes(storeInfo.store_id)) {
       const newData = [...userInfo.collectIds];
       newData.push(storeInfo.store_id);
@@ -180,9 +191,9 @@ StoreHeader.propTypes = {
     phone: PropTypes.string,
   }).isRequired,
   idleMachines: PropTypes.shape({
-    wash: PropTypes.arrayOf(),
-    dry: PropTypes.arrayOf(),
-    pet: PropTypes.arrayOf(),
+    wash: PropTypes.arrayOf(PropTypes.shape({})),
+    dry: PropTypes.arrayOf(PropTypes.shape({})),
+    pet: PropTypes.arrayOf(PropTypes.shape({})),
   }).isRequired,
 };
 
@@ -239,16 +250,74 @@ function StorePage() {
     const selectMachine = machines.filter((machine) => machine.machine_id === machineId)[0];
     const reserveData = {};
     const newReserveIds = [...selectMachine.reserveIds];
-
-    if (categoryIndex === null) {
+    if (!userInfo) {
+      Toast.fire({
+        icon: 'warning',
+        title: '請先登入喔',
+      });
       return;
     }
     if (selectMachine.status === 0) {
+      Toast.fire({
+        icon: 'warning',
+        title: '請直接啟動機台喔',
+      });
       return;
     }
-    if (!userInfo) {
-      console.log('nononon');
+    if (typeof categoryIndex !== 'number') {
+      Toast.fire({
+        icon: 'warning',
+        title: '請選擇洗滌項目喔',
+      });
+      return;
     }
+    const reserveSameMachine = userReserveLists.filter((list) => list.machine_id === machineId);
+    if (reserveSameMachine.length === 2) {
+      Toast.fire({
+        icon: 'error',
+        title: '一個機台最多預約兩筆喔',
+      });
+      return;
+    }
+    if (reserveSameMachine.length > 0) {
+      Swal.fire({
+        title: '確定要再次預約嗎?',
+        text: '我們發現您在這個機台已有一筆預約囉',
+        icon: 'info',
+        showCancelButton: true,
+        customClass: {
+          popup: 'secondReserve',
+        },
+        cancelButtonText: '我再想想',
+        confirmButtonText: '是的,我要預約',
+      }).then(async (result) => {
+        if (result.isConfirmed === false) return;
+        reserveData.category = selectMachine.categorys[categoryIndex];
+        reserveData.user_id = userInfo.user_id;
+        reserveData.machine_id = selectMachine.machine_id;
+        reserveData.machine_name = selectMachine.machine_name;
+        reserveData.store_id = selectMachine.store_id;
+        reserveData.store_name = storeInfo.store_name;
+        reserveData.reserve_time = dayjs().$d;
+
+        const prevEstimateEndTime = await getPrevEstimateEndTime(
+          newReserveIds[newReserveIds.length - 1],
+        );
+        reserveData.estimate_startTime = dayjs(prevEstimateEndTime).add(flexibleTime, 'minute').$d;
+        reserveData.estimate_endTime = dayjs(reserveData.estimate_startTime).add(reserveData.category.time, 'minute').$d;
+        const reserveId = firebaseReserve.post(reserveData);
+        newReserveIds.push(reserveId);
+        firebaseMachines.updateReserveIds(machineId, newReserveIds);
+
+        Swal.fire(
+          '您已預約機台囉',
+          '可以到預約中查看預約狀態',
+          'success',
+        );
+      });
+      return;
+    }
+
     reserveData.category = selectMachine.categorys[categoryIndex];
     reserveData.user_id = userInfo.user_id;
     reserveData.machine_id = selectMachine.machine_id;
@@ -264,6 +333,11 @@ function StorePage() {
       const reserveId = firebaseReserve.post(reserveData);
       newReserveIds.push(reserveId);
       firebaseMachines.updateReserveIds(machineId, newReserveIds);
+
+      Toast.fire({
+        icon: 'success',
+        title: '您已預約機台囉',
+      });
       return;
     }
     const prevEstimateEndTime = await getPrevEstimateEndTime(
@@ -274,18 +348,27 @@ function StorePage() {
     const reserveId = firebaseReserve.post(reserveData);
     newReserveIds.push(reserveId);
     firebaseMachines.updateReserveIds(machineId, newReserveIds);
+
+    Toast.fire({
+      icon: 'success',
+      title: '您已預約機台囉',
+    });
   };
 
   const handleProcessing = async (machineId, categoryIndex) => {
-    if (categoryIndex === null) {
+    if (!userInfo) {
+      Toast.fire({
+        icon: 'warning',
+        title: '請先登入喔',
+      });
       return;
     }
-    if (!userInfo) {
-      console.log('nononon');
-    } else {
-      firebaseReserve.getQuery(userInfo.user_id, 'user_id')
-        .then((res) => res.map((docc) => docc.data()))
-        .then((data) => { setUserReserveLists(data); });
+    if (typeof categoryIndex !== 'number') {
+      Toast.fire({
+        icon: 'warning',
+        title: '請選擇洗滌項目',
+      });
+      return;
     }
     const selectMachine = machines.filter((machine) => machine.machine_id === machineId)[0];
     const processingData = {};
@@ -295,31 +378,59 @@ function StorePage() {
     if (selectMachine.reserveIds[0] !== undefined
           && checkUserReserved.length === 0
     ) {
-      console.log(selectMachine.reserveIds[0]);
-      console.log(checkUserReserved);
-      console.log('你不是下一位餒 乖乖排隊');
+      Toast.fire({
+        icon: 'warning',
+        title: '拍謝~您不是下一位預約者喔',
+      });
       return;
     }
-    processingData.category = selectMachine.categorys[categoryIndex];
-    processingData.user_id = userInfo.user_id;
-    processingData.machine_id = selectMachine.machine_id;
-    processingData.machine_name = selectMachine.machine_name;
-    processingData.store_id = selectMachine.store_id;
-    processingData.store_name = storeInfo.store_name;
-    processingData.start_time = dayjs().$d;
-    processingData.end_time = dayjs().add(processingData.category.time, 'minute').$d;
 
-    firebaseProcessing.post(processingData);
-    firebaseMachines.updateStatus(machineId, 1);
-    firebaseUsers.updatePointes(userInfo.user_id, userInfo.points - processingData.category.price);
+    Swal.fire({
+      title: '確定付款啟動嗎?',
+      text: `您的點數 ${userInfo.points}`,
+      icon: 'info',
+      showCancelButton: true,
+      customClass: {
+        popup: 'secondReserve',
+      },
+      cancelButtonText: '我再想想',
+      confirmButtonText: '是的,我要啟動',
+    }).then(async (result) => {
+      if (result.isConfirmed === false) return;
+      processingData.category = selectMachine.categorys[categoryIndex];
+      processingData.user_id = userInfo.user_id;
+      processingData.machine_id = selectMachine.machine_id;
+      processingData.machine_name = selectMachine.machine_name;
+      processingData.store_id = selectMachine.store_id;
+      processingData.store_name = storeInfo.store_name;
+      processingData.start_time = dayjs().$d;
+      processingData.end_time = dayjs().add(processingData.category.time, 'minute').$d;
 
-    if (checkUserReserved.length !== 0) {
-      const newReserveIds = [...selectMachine.reserveIds];
-      newReserveIds.shift();
-      firebaseMachines.updateReserveIds(machineId, newReserveIds);
-      firebaseReserve.delet(checkUserReserved[0].reserve_id);
-    }
+      firebaseProcessing.post(processingData);
+      firebaseMachines.updateStatus(machineId, 1);
+      firebaseUsers.updatePointes(userInfo.user_id, userInfo.points - processingData.category.price);
+      if (checkUserReserved.length !== 0) {
+        const newReserveIds = [...selectMachine.reserveIds];
+        newReserveIds.shift();
+        firebaseMachines.updateReserveIds(machineId, newReserveIds);
+        firebaseReserve.delet(checkUserReserved[0].reserve_id);
+      }
+      Swal.fire(
+        '您已啟動機台囉',
+        '可以到進行中查看剩餘時間',
+        'success',
+      );
+    });
   };
+  useEffect(() => {
+    if (userInfo?.user_id) {
+      const updateUserReserve = (data) => {
+        setUserReserveLists(data);
+      };
+      return firebaseReserve.onReserveShot(userInfo.user_id, 'user_id', updateUserReserve);
+    }
+    return undefined;
+  }, [userInfo]);
   useEffect(() => {
     if (tag === 'all') {
       setFilterMachines(machines);

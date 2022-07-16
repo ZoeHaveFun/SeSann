@@ -3,6 +3,7 @@ import {
 } from 'react';
 import axios from 'axios';
 import styled from 'styled-components/macro';
+import Swal from 'sweetalert2';
 import { firebaseUsers, firebaseStores } from '../../utils/firestore';
 
 const Wrapper = styled.div`
@@ -123,6 +124,12 @@ function StoreJoinForm() {
         setStoreAddress('');
         storeNameRef.current.value = '';
         storePhoneRef.current.value = '';
+
+        Swal.fire(
+          '入駐成功',
+          '可以到我的店家查看',
+          'success',
+        );
       });
   };
   return (

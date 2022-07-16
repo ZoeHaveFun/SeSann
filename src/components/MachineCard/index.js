@@ -129,7 +129,7 @@ const CategoryWrapper = styled.div`
 function MachineCard({
   machine, handleProcessing, handleReserve, remindMachineId,
 }) {
-  const [categoryIndex, setCategoryIndex] = useState(null);
+  const [categoryIndex, setCategoryIndex] = useState();
   const [reverveList, setReverveList] = useState([]);
   const totalTime = () => reverveList.reduce((pre, current) => pre + current.category.time, 0);
 
@@ -241,5 +241,9 @@ MachineCard.propTypes = {
   }).isRequired,
   handleProcessing: PropTypes.func.isRequired,
   handleReserve: PropTypes.func.isRequired,
-  remindMachineId: PropTypes.string.isRequired,
+  remindMachineId: PropTypes.string,
+};
+
+MachineCard.defaultProps = {
+  remindMachineId: '',
 };

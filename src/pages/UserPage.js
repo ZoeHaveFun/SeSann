@@ -1,5 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useContext, useEffect, useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import {
+  Link, Outlet, useLocation, useNavigate,
+} from 'react-router-dom';
 import styled from 'styled-components/macro';
 import dayjs from 'dayjs';
 import {
@@ -9,7 +12,8 @@ import { HeartCircle } from '@styled-icons/boxicons-solid';
 import { firebaseUsers } from '../utils/firestore';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import user1 from '../style/imgs/userImgs/1.png';
+import user1 from '../style/imgs/userImgs/5.png';
+import { Toast } from '../components/Alert';
 
 const duration = require('dayjs/plugin/duration');
 
@@ -63,6 +67,7 @@ const Left = styled.div`
   margin-right: 16px;
 `;
 const Right = styled.div`
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -76,6 +81,22 @@ const Right = styled.div`
       width: 30px;
       margin-right: 4px;
     }
+  }
+`;
+const ResetButton = styled.button`
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+  background-color: #FFB703;
+  color: #fcfdfd;
+  font-family: 'Noto Sans TC', sans-serif;
+  letter-spacing: 0.08rem;
+  border-radius: 1rem;
+  padding: 0px 10px;
+  height: 26px;
+  cursor: pointer;
+  &:hover {
+    box-shadow: 0px 0px 4px #8B8C89;
   }
 `;
 const UserInfo = styled.div`
@@ -167,7 +188,11 @@ function UserPage() {
   const currentTag = pathArray[pathArray.length - 1];
   const [edit, setEdit] = useState(false);
   const [userData, setUserData] = useState({});
+  const navegate = useNavigate();
 
+  const resetPointes = () => {
+    firebaseUsers.updatePointes(userInfo.user_id, 1000);
+  };
   const updateUserInfo = () => {
     if (!edit) {
       setEdit(!edit);
@@ -175,6 +200,10 @@ function UserPage() {
     }
     firebaseUsers.updateData(userData.user_id, userData);
     setEdit(!edit);
+    Toast.fire({
+      icon: 'success',
+      title: '修改成功',
+    });
   };
   const changeUserInfo = (e) => {
     const newData = { ...userData };
@@ -182,7 +211,11 @@ function UserPage() {
     setUserData(newData);
   };
   useEffect(() => {
-    setUserData(userInfo);
+    if (userInfo.user_id) {
+      setUserData(userInfo);
+    } else {
+      navegate('/', { replace: true });
+    }
   }, [userInfo]);
   return (
     <>
@@ -221,7 +254,11 @@ function UserPage() {
               <span>
                 <MonetizationOn />
                 {userInfo.points}
+                <ResetButton onClick={resetPointes}>
+                  一鍵加值
+                </ResetButton>
               </span>
+
             </Right>
 
           </UserHeader>

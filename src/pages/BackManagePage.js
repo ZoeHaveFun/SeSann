@@ -8,8 +8,10 @@ import { Washer, Dryer } from '@styled-icons/boxicons-solid';
 import {
   Pets, AccessTime, MonetizationOn, Add,
 } from '@styled-icons/material-rounded';
+import Swal from 'sweetalert2';
 import { firebaseMachines, firebaseStores } from '../utils/firestore';
 import AddMachineForm from '../components/AddMachineForm';
+import { Toast } from '../components/Alert';
 
 const MachinesWrapper = styled.div`
   margin-top:  20px;
@@ -17,6 +19,15 @@ const MachinesWrapper = styled.div`
   flex-wrap: wrap;
   flex-direction: row;
   gap: 30px 20px;
+`;
+const Message = styled.h3`
+  width: 100%;
+  box-shadow: 0px 0px 8px #e7ecef;
+  border-radius: 0.8rem;
+  padding: 20px 0px;
+  color: #8B8C89;
+  text-align: center;
+  font-size: 18px;
 `;
 const MachineItem = styled.div`
   width: calc(100% / 3 - 14px);
@@ -38,10 +49,16 @@ const MachineInfo = styled.div`
   font-family: 'Noto Sans TC', sans-serif;
   border-bottom: 1px #DDE1E4 solid;
   padding-bottom: 8px;
-  input {
-    border-radius: 0.4rem;
-    padding: 4px 8px;
-    border: ${(props) => (props.isEdit ? '1px #8ECAE6 solid' : '1px #E7ECEF solid')} ;
+  > label {
+    display: flex;
+    flex-direction: column;
+    margin-left: 8px;
+    > input {
+      width: 100%;
+      border-radius: 0.4rem;
+      padding: 4px 8px;
+      border: ${(props) => (props.isEdit ? '1px #8ECAE6 solid' : '1px #E7ECEF solid')} ;
+    }
   }
 `;
 const DefaultIcon = styled.span`
@@ -101,6 +118,10 @@ const Category = styled.div`
     border-radius: 0.4rem;
     padding: 4px 8px;
     border: ${(props) => (props.isEdit ? '1px #8ECAE6 solid' : '1px #E7ECEF solid')} ;
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
   }
   svg{
     width: 20px;
@@ -127,7 +148,25 @@ function MachineCard({ machine }) {
     setCategorys(newData);
   };
   const deletMachine = () => {
-    firebaseMachines.delet(machine.machine_id);
+    Swal.fire({
+      title: '確定要刪除機台嗎?',
+      icon: 'warning',
+      showCancelButton: true,
+      customClass: {
+        popup: 'secondReserve',
+      },
+      cancelButtonText: '我再想想',
+      confirmButtonText: '是的,我要刪除',
+      confirmButtonColor: '#b64a41',
+    }).then(async (result) => {
+      if (result.isConfirmed === false) return;
+      firebaseMachines.delet(machine.machine_id);
+      Swal.fire(
+        '您已刪除機台囉',
+        '',
+        'success',
+      );
+    });
   };
   const handleMachineEdit = () => {
     if (!edit) {
@@ -139,6 +178,11 @@ function MachineCard({ machine }) {
     newData.categorys = categorys;
     firebaseMachines.updateData(machine.machine_id, newData);
     setEdit(!edit);
+
+    Toast.fire({
+      icon: 'success',
+      title: '修改成功',
+    });
   };
 
   return (
@@ -168,11 +212,11 @@ function MachineCard({ machine }) {
               </label>
               <label htmlFor="time">
                 <AccessTime />
-                <input type="text" name="time" value={category.time} disabled={!edit} onChange={(e) => { handleCategoryChange(e, index); }} />
+                <input type="number" name="time" value={category.time} disabled={!edit} onChange={(e) => { handleCategoryChange(e, index); }} />
               </label>
               <label htmlFor="price">
                 <MonetizationOn />
-                <input type="text" name="price" value={category.price} disabled={!edit} onChange={(e) => { handleCategoryChange(e, index); }} />
+                <input type="number" name="price" value={category.price} disabled={!edit} onChange={(e) => { handleCategoryChange(e, index); }} />
               </label>
             </Category>
           ))
@@ -237,7 +281,7 @@ const FormWrapper = styled.div`
   align-items: center;
   justify-content: center;
 `;
-const CustomSelect = styled(ReactSelect)`
+const StoresSelect = styled(ReactSelect)`
   border-radius: 0.8rem;
   width: 80%;
   margin-left: 16px;
@@ -312,7 +356,7 @@ function BackManagePage() {
         <FormWrapper isAdd={isAdd}>
           <AddMachineForm storeId={storeId} setIsAdd={setIsAdd} />
         </FormWrapper>
-        <CustomSelect
+        <StoresSelect
           classNamePrefix="react-select"
           options={manageOptions}
           value={selectedOption}
@@ -322,7 +366,7 @@ function BackManagePage() {
       </NavWrapper>
       <MachinesWrapper>
         {
-        storeId && machines.length === 0 ? <h2>老闆你這家店還沒機台餒</h2>
+        storeId && machines.length === 0 ? <Message>老闆你這家店還沒機台喔</Message>
           : filterMachines?.map?.(
             (machine) => <MachineCard machine={machine} key={machine.machine_id} />,
           )

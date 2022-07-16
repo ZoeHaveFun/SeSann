@@ -72,14 +72,15 @@ const TimeLine = styled.div`
   }
   &>span {
     position: absolute;
-    top: 24px;
+    top: 16px;
     left: 18px;
     width: calc(100% - 36px);
     text-align: center;
     border-bottom: 2px #DDE1E4 solid;
-    span {
+    >span {
       display: block;
       margin-bottom: 4px;
+      margin-top: 8px;
     }
   }
 `;
@@ -168,7 +169,9 @@ export function OrderList({ item }) {
         </StartDiv>
         <TimeLine>
           <Album />
-          <span>{`${item.category.time} m`}</span>
+          <span>
+            <span>{`${item.category.time} m`}</span>
+          </span>
           <Album />
         </TimeLine>
         <EndDiv>
@@ -207,7 +210,9 @@ export function ReserveList({ item, CancelReserve }) {
         </StartDiv>
         <TimeLine>
           <Adjust />
-          <span>{`${item.category.time} m`}</span>
+          <span>
+            <span>{`${item.category.time} m`}</span>
+          </span>
           <Adjust />
         </TimeLine>
         <EndDiv>
@@ -250,10 +255,13 @@ export function ProcessinfList({ item }) {
       orderData.end_time = item.end_time;
       orderData.store_id = item.store_id;
       orderData.store_name = item.store_name;
+      orderData.process_id = item.process_id;
 
       const newOrders = [...userInfo.orders, orderData];
+      const newRecords = [...userInfo.records, orderData];
       finishedInStore(orderData);
       firebaseUsers.addOrders(userInfo.user_id, newOrders);
+      firebaseUsers.updateRecords(userInfo.user_id, newRecords);
       firebaseProcessing.delet(item.process_id);
       firebaseMachines.updateStatus(item.machine_id, 0);
     };
@@ -290,7 +298,6 @@ export function ProcessinfList({ item }) {
         <TimeLine>
           <Album />
           <span>
-            {/* <Loading /> */}
             { countDown ? <span>{`${countDown} m`}</span>
               : <Loading />}
           </span>

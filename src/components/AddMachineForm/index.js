@@ -1,8 +1,10 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { PropTypes } from 'prop-types';
 import styled from 'styled-components/macro';
 import { Close, CheckCircleOutline } from '@styled-icons/material-rounded';
+import ReactSelect from 'react-select';
 import { firebaseMachines } from '../../utils/firestore';
+import { Toast } from '../Alert';
 
 const washCategorys = [
   {
@@ -55,7 +57,11 @@ const petCategorys = [
     price: 80,
   },
 ];
-
+const typeOptions = [
+  { value: 'wash', label: '洗衣機' },
+  { value: 'dry', label: '烘衣機' },
+  { value: 'pet', label: '寵物專用' },
+];
 const Wrapper = styled.div`
   background-color: #FEFCFB;
   position: relative;
@@ -66,15 +72,18 @@ const Wrapper = styled.div`
   flex-direction: column;
   align-items: flex-end;
   color: #1C5174;
-  &>h3 {
-    width: 100%;
-    text-align: center;
-    margin-bottom: 12px;
+  label {
+    display: flex;
   }
-  ul {
-    font-size: 16px;
-    font-family: 'Noto Sans TC', sans-serif;
-    margin-bottom: 16px;
+  input {
+    flex: 1;
+    border-radius: 0.4rem;
+    padding: 4px 8px;
+    margin-left: 8px;
+    border: 1px #8ECAE6 solid;
+  }
+  >div {
+
   }
 `;
 const CloseBtn = styled.span`
@@ -92,6 +101,13 @@ const CloseBtn = styled.span`
   &>svg{
     width: 20px;
   }
+`;
+const Title = styled.h2`
+  width: 100%;
+  text-align: center;
+  margin-bottom: 12px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 500;
 `;
 const Button = styled.button`
   background-color: #ebb12b;
@@ -113,18 +129,54 @@ const Button = styled.button`
     width: 20px;
   }
 `;
+const TypeSelectWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: 10px 0 20px;
+`;
+const TypeSelect = styled(ReactSelect)`
+  border-radius: 0.8rem;
+  flex: 1;
+  margin-left: 8px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 14px;
+  color: #023047;
+  border-radius: 1rem;
+  .react-select__control {
+    border-radius: 0.8rem;
+  }
+  .react-select__menu {
+  }
+  .react-select__control--is-focused {
+    box-shadow: 0px 0px 0px 1px #1C5174;
+  }
+  .react-select__single-value{
+    color: #023047;
+  }
+  .react-select__option--is-focused {
+    background: #DDE1E4;
+  }
+  .react-select__option--is-selected {
+    background: #FFC94A;
+    color: #1C5174;
+  }
+`;
 
 function AddMachineForm({ storeId, setIsAdd }) {
   const machineNameRef = useRef(null);
-  const machineTypeRef = useRef(null);
+  const [selectedOption, setSelectedOption] = useState(typeOptions[0]);
 
+  const handleSelectChange = (e) => {
+    setSelectedOption(e);
+  };
   const handlePostMachine = () => {
-    if (!machineNameRef.current.value || !machineTypeRef.current.value) return;
+    if (!machineNameRef.current.value) return;
     const postData = {
       status: 0,
     };
     postData.machine_name = machineNameRef.current.value;
-    postData.type = machineTypeRef.current.value;
+    postData.type = selectedOption.value;
     postData.reserveIds = [];
     postData.store_id = storeId;
     if (postData.type === 'wash') {
@@ -134,37 +186,36 @@ function AddMachineForm({ storeId, setIsAdd }) {
     } else { postData.categorys = petCategorys; }
 
     machineNameRef.current.value = '';
-    machineTypeRef.current.value = '';
 
     firebaseMachines.post(postData);
+    setIsAdd(false);
+
+    Toast.fire({
+      icon: 'success',
+      title: '新增成功',
+    });
   };
   return (
     <Wrapper>
       <CloseBtn onClick={() => { setIsAdd(false); }}>
         <Close />
       </CloseBtn>
-      <h3>新增機台</h3>
-      <ul>
-        <li>
-          機台名稱:
-          <input type="text" ref={machineNameRef} />
-        </li>
-        <li>
-          機台類型:
-          <select ref={machineTypeRef}>
-            <option value="">選擇機台類型</option>
-            <option value="wash">洗衣</option>
-            <option value="dry">烘衣</option>
-            <option value="pet">寵物專用</option>
-          </select>
-        </li>
-        {/* <li>
-          選項模板:
-          <select ref={machineCategorysRef}>
-            <option value="">選項模板</option>
-          </select>
-        </li> */}
-      </ul>
+      <Title>新增機台</Title>
+      <label htmlFor="machineName">
+        機台名稱:
+        <input type="text" name="machineName" ref={machineNameRef} />
+      </label>
+
+      <TypeSelectWrapper>
+        機台類型:
+        <TypeSelect
+          classNamePrefix="react-select"
+          options={typeOptions}
+          value={selectedOption}
+          onChange={handleSelectChange}
+          placeholder="選擇類型"
+        />
+      </TypeSelectWrapper>
       <Button type="button" onClick={handlePostMachine}>
         <CheckCircleOutline />
         確定
