@@ -1,6 +1,5 @@
 import { useRef } from 'react';
 import styled from 'styled-components/macro';
-import { PropTypes } from 'prop-types';
 import { firebaseUsers } from '../../utils/firestore';
 import { Toast } from '../Alert';
 
@@ -13,9 +12,10 @@ const RegisterForm = styled.div`
   width: 600px;
   margin-left: calc(10vw);
   position: relative;
-  box-shadow:  0px 0px 2px #999;
+  background-color: #1C5174;
+  box-shadow: 0px 0px 8px 2px #8B8C89;
   display: flex;
-  padding: 20px 16px;
+  padding: 20px 30px;
   border-radius: 0.8rem;
   flex-direction: column;
   &>div:nth-child(2){
@@ -23,7 +23,7 @@ const RegisterForm = styled.div`
     flex-direction: column;
     margin-left: 16px;
     label {
-      color: #1C5174;
+      color: #DDE1E4;
       font-family: 'Noto Sans TC', sans-serif;
       width: 280px;
       display: flex;
@@ -32,6 +32,8 @@ const RegisterForm = styled.div`
       input {
         margin-left: 16px;
         flex: 1;
+        padding: 4px 6px;
+        border-radius: 0.2rem;
         border: transparent;
         border-bottom: 1px #DDE1E4 solid;
       }
@@ -61,10 +63,11 @@ const TitleDiv = styled.div`
   width: 80%;
   display: flex;
   font-family: 'Noto Sans TC', sans-serif;
-  color:  #1C5174;
+  color: #FFB703;
   margin-bottom: 16px;
   & >h2 {
     font-size: 32px;
+    font-weight: 500;
     margin-right: 10px;
     letter-spacing: 0.2rem;
   }
@@ -84,7 +87,7 @@ const SecTitle = styled.div`
     width: 60px;
   }
 `;
-function UserRegisterForm({ JoinFormRef }) {
+function UserRegisterForm() {
   const registerName = useRef();
   const registerEmail = useRef();
   const registerPassword = useRef();
@@ -106,7 +109,7 @@ function UserRegisterForm({ JoinFormRef }) {
     });
   };
   return (
-    <Wrapper ref={JoinFormRef}>
+    <Wrapper>
       <RegisterForm>
         <TitleDiv>
           <h2>會員註冊</h2>
@@ -136,7 +139,3 @@ function UserRegisterForm({ JoinFormRef }) {
 }
 
 export default UserRegisterForm;
-
-UserRegisterForm.propTypes = {
-  JoinFormRef: PropTypes.shape({}).isRequired,
-};
