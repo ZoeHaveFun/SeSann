@@ -103,7 +103,7 @@ function Login() {
           <Link to="/">
             <Logo>
               <img alt="logo" src={logo} />
-              SéSann 泤衫
+              SéSann
             </Logo>
           </Link>
           <p>
