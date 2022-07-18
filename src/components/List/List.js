@@ -98,7 +98,7 @@ const EndDiv = styled(TimeDiv)`
   margin-left: 16px;
 `;
 const ConsumItem = styled.div`
-  width: 120px;
+  width: 140px;
   color: #1C5174;
   font-family: 'Noto Sans TC', sans-serif;
   display: flex;
@@ -117,7 +117,7 @@ const ConsumItem = styled.div`
   }
 `;
 const ConsumItemHaveBtn = styled.div`
-width: 120px;
+width: 140px;
 color: #1C5174;
 font-family: 'Noto Sans TC', sans-serif;
 display: flex;

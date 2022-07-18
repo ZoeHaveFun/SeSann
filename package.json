@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@react-spring/parallax": "^9.5.0",
+    "@react-spring/web": "^9.5.0",
     "@styled-icons/boxicons-solid": "^10.38.0",
     "@styled-icons/material-rounded": "^10.34.0",
     "@testing-library/jest-dom": "^5.16.4",
@@ -22,6 +24,7 @@
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
     "react-select": "^5.4.0",
+    "react-spring": "^9.5.0",
     "styled-components": "^5.3.5",
     "sweetalert2": "^11.4.22",
     "web-vitals": "^2.1.4"

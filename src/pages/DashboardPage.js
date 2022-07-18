@@ -159,7 +159,7 @@ function DashboardPage() {
   return (
     <>
       <NavWrapper>
-        Rang
+        Range
         <TabWrapper>
           <Tab isSelect={selectTab === 'Today'} onClick={() => { changeRange('Today'); }}>Today</Tab>
           <Tab isSelect={selectTab === '7Day'} onClick={() => { changeRange('7Day'); }}>7 Day</Tab>

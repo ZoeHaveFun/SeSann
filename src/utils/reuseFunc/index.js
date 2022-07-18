@@ -8,6 +8,9 @@ const duration = require('dayjs/plugin/duration');
 
 dayjs.extend(duration);
 
+export const parallaxUrl = (name, token) => `https://firebasestorage.googleapis.com/v0/b/laundry-27ace.appspot.com/o/parallax%2F${name}.png?alt=media&token=${token}`;
+export const userUrl = (name, token) => `https://firebasestorage.googleapis.com/v0/b/laundry-27ace.appspot.com/o/userImgs%2F${name}.png?alt=media&token=${token}`;
+
 const writeInStoreOrderRecord = (userId, data) => {
   const newRecord = { ...data };
   newRecord.user_id = userId;

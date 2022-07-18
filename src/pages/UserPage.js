@@ -12,7 +12,7 @@ import { HeartCircle } from '@styled-icons/boxicons-solid';
 import { firebaseUsers } from '../utils/firestore';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import user1 from '../style/imgs/userImgs/5.png';
+import { userUrl } from '../utils/reuseFunc';
 import { Toast } from '../components/Alert';
 
 const duration = require('dayjs/plugin/duration');
@@ -229,7 +229,7 @@ function UserPage() {
         <Container>
           <UserHeader>
             <Left>
-              <UserImg src={user1} />
+              <UserImg src={userUrl('5', '6208b76f-6e08-401c-9d10-229da596cce7')} />
               <UserInfo isEdit={edit}>
                 <label htmlFor="userName">
                   <input
