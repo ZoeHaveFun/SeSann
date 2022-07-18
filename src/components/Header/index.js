@@ -7,7 +7,7 @@ import {
 } from '@styled-icons/material-rounded';
 import { firebaseUsers } from '../../utils/firestore';
 import logo from '../../style/imgs/raccoon.svg';
-import userImgDefault from '../../style/imgs/userImgs/5.png';
+import { userUrl } from '../../utils/reuseFunc';
 
 const HeaderWrapper = styled.div`
   z-index: 10;
@@ -163,7 +163,7 @@ function Header() {
       <Link to="/">
         <Logo>
           <img alt="logo" src={logo} />
-          SéSann 泤衫
+          SéSann
         </Logo>
       </Link>
 
@@ -192,7 +192,7 @@ function Header() {
             )
             : (
               <BurgerWarpper>
-                <UserImg src={userImgDefault} />
+                <UserImg src={userUrl('5', '6208b76f-6e08-401c-9d10-229da596cce7')} />
                 <MenuWrapper open={menuOpen}>
                   <TopWrapper>
                     <Link to="/user/processing"><span>進行中</span></Link>
