@@ -17,7 +17,7 @@ import {
 } from 'ramda';
 import ReactSelect from 'react-select';
 import { Link } from 'react-router-dom';
-import { Pets } from '@styled-icons/material-rounded';
+import { Pets, Store } from '@styled-icons/material-rounded';
 import { Washer, Dryer } from '@styled-icons/boxicons-solid';
 import { firebaseStores, firebaseMachines } from '../../utils/firestore';
 import { handleIdleMachines } from '../../utils/reuseFunc';
@@ -188,19 +188,54 @@ const markerColor = (type) => {
   return '#1C5174';
 };
 const StatusWrapper = styled.div`
+  margin: 6px 0px;
   display: flex;
+  gap: 0px 6px;
 `;
 const Icon = styled.span`
   font-size: 16px;
   line-height: 30px;
-  margin-right: 8px;
   color: ${(props) => (markerColor(props.type))};
   & > svg {
     width: 30px;
   }
 `;
+const PopWrapper = styled.div`
+  width: 140px;
+  &>h2 {
+      padding-left: 2px;
+      display: inline-block;
+      font-size: 16px;
+      font-weight: 500;
+      font-family: 'Noto Sans TC', sans-serif;
+      color: #1C5174;
+    }
+  &>div:nth-child(3) {
+    margin-top: 10px;
+    >a{
+      display: inline-flex;
+      justify-content: flex-end;
+      padding: 4px 8px;
+      border-radius: 0.8rem;
+      box-shadow: 0px 0px 4px #8B8C89;
+      font-size: 14px;
+      font-family: 'Noto Sans TC', sans-serif;
+      color: #8B8C89;
+      :hover{
+        color: #FEFCFB;
+        background-color: #FFB703;
+      }
+    }
+    svg {
+      width: 20px;
+    }
+  }
+`;
+const NoIdleMachine = styled.div`
+  font-family: 'Noto Sans TC', sans-serif;
+  color: #8B8C89;
+`;
 function MapMarker({ store }) {
-  // const [Machines, setMachines] = useState([]);
   const [idleMachines, setIdleMachines] = useState({});
   useEffect(() => {
     const handleMachinessUpdate = (newData) => {
@@ -216,37 +251,56 @@ function MapMarker({ store }) {
       icon={icon.store}
     >
       <Popup>
-        <span>{store.store_name}</span>
-        <StatusWrapper>
-          {
-            idleMachines?.wash?.length > 0
-              ? (
-                <Icon type="wash">
-                  <Washer />
-                  {idleMachines.wash.length}
-                </Icon>
-              ) : ''
-          }
-          {
-            idleMachines?.dry?.length > 0
-              ? (
-                <Icon type="dry">
-                  <Dryer />
-                  {idleMachines.dry.length}
-                </Icon>
-              ) : ''
-          }
-          {
-            idleMachines?.pet?.length > 0
-              ? (
-                <Icon type="pet">
-                  <Pets />
-                  {idleMachines.pet.length}
-                </Icon>
-              ) : ''
-          }
-        </StatusWrapper>
-        <Link to={`/store?store_id=${store.store_id}`}>前往店家</Link>
+        <PopWrapper>
+          <h2>{store.store_name}</h2>
+          <StatusWrapper>
+            {
+              idleMachines?.wash?.length > 0
+                ? (
+                  <Icon type="wash">
+                    <Washer />
+                    {idleMachines.wash.length}
+                  </Icon>
+                ) : ''
+            }
+            {
+              idleMachines?.dry?.length > 0
+                ? (
+                  <Icon type="dry">
+                    <Dryer />
+                    {idleMachines.dry.length}
+                  </Icon>
+                ) : ''
+            }
+            {
+              idleMachines?.pet?.length > 0
+                ? (
+                  <Icon type="pet">
+                    <Pets />
+                    {idleMachines.pet.length}
+                  </Icon>
+                ) : ''
+            }
+            {
+              idleMachines?.pet?.length === 0
+              && idleMachines?.dry?.length === 0
+              && idleMachines?.wash?.length === 0 ? (
+                <NoIdleMachine>
+                  拍謝~(๑•́ ₃ •̀๑)
+                  <br />
+                  目前沒有空閒的機台
+                </NoIdleMachine>
+                ) : ''
+            }
+          </StatusWrapper>
+          <div>
+            <Link to={`/store?store_id=${store.store_id}`}>
+              前往店家
+              <Store />
+            </Link>
+          </div>
+        </PopWrapper>
+
       </Popup>
       <Tooltip sticky>{store.store_name}</Tooltip>
     </Marker>
@@ -267,10 +321,11 @@ const TitleDiv = styled.div`
   width: 80%;
   display: flex;
   margin: auto;
+  margin-bottom: 10px;
   font-family: 'Noto Sans TC', sans-serif;
   color:  #1C5174;
   & >h2 {
-    font-size: 32px;
+    font-size: 42px;
     margin-right: 10px;
     letter-spacing: 0.2rem;
   }
@@ -290,7 +345,7 @@ const SecTitle = styled.div`
     width: 60px;
   }
 `;
-function LaundryMap({ LaundryMapRef }) {
+function LaundryMap() {
   const [location, setLocation] = useState([23.991074, 121.611198]);
   const mapRef = useRef(null);
   const [boundry, setBoundry] = useState([]);
@@ -326,14 +381,14 @@ function LaundryMap({ LaundryMapRef }) {
   }, []);
 
   return (
-    <Wrapper ref={LaundryMapRef}>
-      <TitleDiv>
+    <Wrapper>
+      {/* <TitleDiv>
         <h2>找一找</h2>
         <SecTitle>
           <span>附近的自助洗衣</span>
           <span />
         </SecTitle>
-      </TitleDiv>
+      </TitleDiv> */}
       <SelectLocationBar
         city={city}
         setCity={setCity}
@@ -372,7 +427,3 @@ function LaundryMap({ LaundryMapRef }) {
   );
 }
 export default LaundryMap;
-
-LaundryMap.propTypes = {
-  LaundryMapRef: PropTypes.shape({}).isRequired,
-};
