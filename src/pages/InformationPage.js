@@ -262,7 +262,7 @@ function RecordCard({ record, deletRecord }) {
             )
             : (
               <Titile isExpiredReserve>
-                <span>IT&apos;S CANCEL!</span>
+                <span>IT&apos;S CANCELED!</span>
                 你的預約項目已逾期:
               </Titile>
             )}
@@ -409,24 +409,13 @@ function InformationPage() {
           )
       }
       {
-        reminds.length === 0 && records.length === 0 ? (
-          <Message>
-            “你可以帮我洗個東西嗎”
-            <br />
-            “洗什麼”
-            <br />
-            “喜歡我”
-          </Message>
-        )
-          : (
-            records?.map?.((record) => (
-              <RecordCard
-                record={record}
-                key={record.reserve_id || record.process_id}
-                deletRecord={deletRecord}
-              />
-            ))
-          )
+        records?.map?.((record) => (
+          <RecordCard
+            record={record}
+            key={record.reserve_id || record.process_id}
+            deletRecord={deletRecord}
+          />
+        ))
       }
     </Wrapper>
   );
