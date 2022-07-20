@@ -1,5 +1,3 @@
-/* eslint-disable max-len */
-/* eslint-disable no-console */
 import {
   useEffect, useState, useContext,
 } from 'react';
@@ -408,7 +406,10 @@ function StorePage() {
 
       firebaseProcessing.post(processingData);
       firebaseMachines.updateStatus(machineId, 1);
-      firebaseUsers.updatePointes(userInfo.user_id, userInfo.points - processingData.category.price);
+      firebaseUsers.updatePointes(
+        userInfo.user_id,
+        userInfo.points - processingData.category.price,
+      );
       if (checkUserReserved.length !== 0) {
         const newReserveIds = [...selectMachine.reserveIds];
         newReserveIds.shift();
