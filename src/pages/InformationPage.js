@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 import { firebaseUsers, firebaseReserve, firebaseMachines } from '../utils/firestore';
 import DefaultstoreMainImg from '../style/imgs/storeMainImg.jpg';
 import Loading from '../components/Loading';
+import { archiveReserve } from '../utils/reuseFunc';
 
 const duration = require('dayjs/plugin/duration');
 
@@ -122,6 +123,7 @@ function RemindCard({ remind, CancelReserve }) {
       ).$d;
       if (timeLeft.minutes < 1 && timeLeft.seconds < 1) {
         clearInterval(handleCountDown);
+        archiveReserve([remind]);
       } else {
         setCountDown(`${timeLeft.minutes} : ${timeLeft.seconds}`);
       }

@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import { firebaseReserve, firebaseUsers, firebaseMachines } from '../utils/firestore';
 import { ReserveList } from '../components/List';
+import { initialData } from '../utils/reuseFunc';
 
 const Wrapper = styled.div`
   display: flex;
@@ -54,11 +55,16 @@ function ReservePage() {
       );
     });
   };
+  const getReserve = () => {
+    const handleReserveUpdate = (newData) => {
+      setReserves(newData);
+      initialData('reserve', newData);
+    };
+    return firebaseReserve.onReserveShot(userId, 'user_id', handleReserveUpdate);
+  };
   useEffect(() => {
     if (userId) {
-      firebaseReserve.getQuery(userId, 'user_id')
-        .then((res) => res.map((item) => item.data()))
-        .then((data) => setReserves(data));
+      getReserve();
     } else {
       navegate('/', { replace: true });
     }

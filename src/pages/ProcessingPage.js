@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { firebaseProcessing, firebaseUsers } from '../utils/firestore';
 import { ProcessinfList } from '../components/List';
+import { initialData } from '../utils/reuseFunc';
 
 const Wrapper = styled.div`
   display: flex;
@@ -28,6 +29,7 @@ function ProcessingPage() {
   const getProcessing = () => {
     const handleProcessUpdate = (newData) => {
       setProcess(newData);
+      initialData('processing', newData);
     };
     return firebaseProcessing.onProcessingShot(userId, 'user_id', handleProcessUpdate);
   };
