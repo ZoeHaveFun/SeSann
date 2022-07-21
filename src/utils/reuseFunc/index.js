@@ -39,7 +39,7 @@ const writeInUserOrders = async (list) => {
   writeInStoreOrderRecord(userInfo.user_id, orderData);
 };
 
-const archiveOrder = (data) => {
+export const archiveOrder = (data) => {
   data.forEach((list) => {
     writeInUserOrders(list);
     firebaseProcessing.delet(list.process_id);
@@ -83,7 +83,7 @@ const writeInUserRecords = async (list) => {
 
   firebaseUsers.updateRecords(userInfo.user_id, newRecords);
 };
-const archiveReserve = (data) => {
+export const archiveReserve = (data) => {
   data.forEach((list) => {
     writeInUserRecords(list);
     resetMachineReserve(list);
@@ -97,7 +97,7 @@ const expiredReserve = async (data) => {
     || (Number(dayjs(list.estimate_startTime.seconds * 1000).format('HH')) <= Number(dayjs().format('HH')))
   ));
   const finishedData = finishedYMDH.filter((list) => Number(dayjs(list.estimate_startTime.seconds * 1000).format('mm')) <= Number(dayjs().format('mm')));
-
+  console.log(dayjs(data[0].estimate_startTime.seconds * 1000).format('mm'), dayjs().format('mm'));
   archiveReserve(finishedData);
 };
 export const initialData = async (type, data) => {
