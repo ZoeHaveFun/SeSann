@@ -9,51 +9,51 @@ import { Toast } from '../Alert';
 const washCategorys = [
   {
     name: '快洗',
-    time: 0.5,
+    time: 32,
     price: 50,
   },
   {
     name: '標準洗',
-    time: 1,
+    time: 42,
     price: 60,
   },
   {
     name: '柔洗',
-    time: 1,
+    time: 56,
     price: 70,
   },
 ];
 const dryCategorys = [
   {
     name: '微微烘',
-    time: 0.5,
+    time: 30,
     price: 50,
   },
   {
     name: '標準烘',
-    time: 1,
+    time: 40,
     price: 60,
   },
   {
     name: '超級烘',
-    time: 1,
+    time: 50,
     price: 70,
   },
 ];
 const petCategorys = [
   {
     name: '髒',
-    time: 0.5,
+    time: 32,
     price: 60,
   },
   {
     name: '很髒',
-    time: 1,
+    time: 42,
     price: 70,
   },
   {
     name: '超級髒',
-    time: 1,
+    time: 56,
     price: 80,
   },
 ];
