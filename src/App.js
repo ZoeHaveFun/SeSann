@@ -74,6 +74,7 @@ function App() {
           </Route>
           <Route path="*" element={<PageNotFound />} />
         </Routes>
+
       </BrowserRouter>
     </AuthContext.Provider>
   );
