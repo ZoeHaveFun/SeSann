@@ -1,0 +1,78 @@
+.colored-toast {
+  position: absolute;
+  top: 80px;
+}
+.colored-toast.swal2-icon-success {
+  background-color: #a5be00 !important;
+  opacity: 0.9 !important;
+}
+
+.colored-toast.swal2-icon-error {
+  background-color: #b64a41 !important;
+  opacity: 0.9 !important;
+}
+
+.colored-toast.swal2-icon-warning {
+  background-color: #FFB703 !important;
+  opacity: 0.9 !important;
+}
+
+.colored-toast.swal2-icon-info {
+  background-color: #327CA7 !important;
+  opacity: 0.9 !important;
+}
+
+.colored-toast.swal2-icon-question {
+  background-color: #87adbd !important;
+}
+
+.colored-toast .swal2-title {
+  color: white;
+}
+
+.colored-toast .swal2-close {
+  color: white;
+}
+
+.colored-toast .swal2-html-container {
+  color: white;
+}
+.swal2-icon.swal2-info {
+  color: #327CA7;
+  border-color: #87adbd;
+}
+.swal2-icon.swal2-warning {
+  color: #FFB703;
+  border-color: #FFB703;
+}
+.secondReserve.swal2-popup.swal2-modal,
+.swal2-container.swal2-center>.swal2-popup{
+  width: auto !important;
+  padding: 10px 20px 20px !important;
+}
+.secondReserve.swal2-icon {
+  margin: 30px auto 0 !important;
+  color: #FFB703 !important;
+  border-color: #FFB703 !important;
+}
+.swal2-styled.swal2-confirm {
+  background-color: #a5be00 !important;
+}
+.secondReserve .swal2-cancel {
+  background-color: #8B8C89 !important;
+  color: #FEFCFB !important;
+}
+.secondReserve.swal2-title {
+  font-size: 24px !important;
+  padding-top: 20px !important;
+}
+
+.swal2-html-container {
+  font-size: 16px !important;
+  color: #8B8C89 !important;
+  font-family: 'Noto Sans TC', sans-serif !important;
+  margin: 10px 40px 0 !important;
+}
+.secondReserve.swal2-actions {
+  margin-top: 30px !important;
+}

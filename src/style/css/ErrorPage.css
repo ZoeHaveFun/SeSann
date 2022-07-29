@@ -1,0 +1,52 @@
+
+.errorPagewrapper {
+  background: #1C5174;
+  height: 100%;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 10;
+}
+
+.instructions {
+  z-index: 12;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Work Sans', sans-serif;
+  font-weight: 500;
+  color: #fff;
+  border: 3px solid #fff;
+  border-radius: 6px;
+  padding: 0px 50px 20px;
+  font-family: 'Noto Sans TC', sans-serif;
+  text-align: center;
+}
+.instructions > h1{
+  font-size: 100px;
+}
+.instructions> p {
+  font-size: 18px;
+  letter-spacing: 0.2rem;
+  color: #fff;
+}
+.instructions > a > button{
+  margin-top: 20px;
+  cursor: pointer;
+  color: #fff;
+  font-size: 16px;
+  font-family: 'Noto Sans TC', sans-serif;
+  padding: 8px 16px;
+  box-shadow: 0px 0px 1px 1px #FFC94A;
+  border-radius: 1.2rem;
+  font-weight: 500;
+}
+.instructions > a > button:hover {
+  background-color: #FFC94A;
+  color: #1C5174;
+}
