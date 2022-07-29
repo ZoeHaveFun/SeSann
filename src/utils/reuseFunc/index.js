@@ -39,7 +39,7 @@ const writeInUserOrders = async (list) => {
   writeInStoreOrderRecord(userInfo.user_id, orderData);
 };
 
-const archiveOrder = (data) => {
+export const archiveOrder = (data) => {
   data.forEach((list) => {
     writeInUserOrders(list);
     firebaseProcessing.delet(list.process_id);
@@ -83,7 +83,7 @@ const writeInUserRecords = async (list) => {
 
   firebaseUsers.updateRecords(userInfo.user_id, newRecords);
 };
-const archiveReserve = (data) => {
+export const archiveReserve = (data) => {
   data.forEach((list) => {
     writeInUserRecords(list);
     resetMachineReserve(list);
@@ -97,7 +97,6 @@ const expiredReserve = async (data) => {
     || (Number(dayjs(list.estimate_startTime.seconds * 1000).format('HH')) <= Number(dayjs().format('HH')))
   ));
   const finishedData = finishedYMDH.filter((list) => Number(dayjs(list.estimate_startTime.seconds * 1000).format('mm')) <= Number(dayjs().format('mm')));
-
   archiveReserve(finishedData);
 };
 export const initialData = async (type, data) => {
@@ -114,85 +113,54 @@ export const handleIdleMachines = (machines) => {
 
 export const totalCustomerRecord = (days, data) => {
   let customer;
-  if (days === undefined) {
-    customer = data.order_record.length;
-  }
   if (days === 1) {
     const todayRecord = data.order_record.filter((record) => dayjs(record.start_time.seconds * 1000).format('YYYYMMDD') === dayjs().format('YYYYMMDD'));
     customer = todayRecord.length;
-  }
-  if (days === 7) {
-    const customerRecord = data.order_record.filter((record) => (
-      ((dayjs(record.start_time.seconds * 1000).format('YYYYMM') === dayjs().format('YYYYMM')) && (Number(dayjs(record.start_time.seconds * 1000).format('DD')) >= Number(dayjs().format('DD')) - 7))
-    ));
-
-    customer = customerRecord.length;
   }
   return customer;
 };
 
 export const totalIncomeRecord = (days, data) => {
   let income;
-  if (days === undefined) {
-    income = data.order_record.reduce((accu, curr) => accu + curr.category.price, 0);
-  }
   if (days === 1) {
     const toddayRecord = data.order_record.filter((record) => dayjs(record.start_time.seconds * 1000).format('YYYYMMDD') === dayjs().format('YYYYMMDD'));
     income = toddayRecord.reduce((accu, curr) => accu + curr.category.price, 0);
-  }
-  if (days === 7) {
-    const customerRecord = data.order_record.filter((record) => (
-      ((dayjs(record.start_time.seconds * 1000).format('YYYYMM') === dayjs().format('YYYYMM')) && (Number(dayjs(record.start_time.seconds * 1000).format('DD')) >= Number(dayjs().format('DD')) - 7))
-    ));
-    income = customerRecord.reduce((accu, curr) => accu + curr.category.price, 0);
   }
   return income;
 };
 
 export const operationCustomerRecord = (tab, time, data) => {
-  let customer;
+  let newRecord;
   if (tab === 'Today') {
-    const newRecord = data.order_record.filter((record) => (dayjs(record.start_time.seconds * 1000).format('YYYY/MM/DD') === dayjs().format('YYYY/MM/DD')) && (dayjs(record.start_time.seconds * 1000).format('HH') === time.split(':')[0]));
-    customer = newRecord.length;
+    newRecord = data.order_record.filter((record) => (dayjs(record.start_time.seconds * 1000).format('YYYY/MM/DD') === dayjs().format('YYYY/MM/DD')) && (dayjs(record.start_time.seconds * 1000).format('HH') === time.split(':')[0]));
   }
   if (tab === '7Day') {
-    const newRecord = data.order_record.filter((record) => dayjs(record.start_time.seconds * 1000).format('YYYY/MM/DD') === time);
-    customer = newRecord.length;
+    newRecord = data.order_record.filter((record) => dayjs(record.start_time.seconds * 1000).format('YYYY/MM/DD') === time);
   }
   if (tab === 'Month') {
-    const newRecord = data.order_record.filter((record) => dayjs(record.start_time.seconds * 1000).format('MMM DD') === time);
-
-    customer = newRecord.length;
+    newRecord = data.order_record.filter((record) => dayjs(record.start_time.seconds * 1000).format('MMM DD') === time);
   }
   if (tab === 'Year') {
-    const newRecord = data.order_record.filter((record) => dayjs(record.start_time.seconds * 1000).format('MMM') === time);
-
-    customer = newRecord.length;
+    newRecord = data.order_record.filter((record) => dayjs(record.start_time.seconds * 1000).format('MMM') === time);
   }
-
-  return customer;
+  return newRecord.length;
 };
 
 export const operationIncomeRecord = (tab, time, data) => {
-  let income;
+  let newRecord;
   if (tab === 'Today') {
-    const newRecord = data.order_record.filter((record) => (dayjs(record.start_time.seconds * 1000).format('YYYY/MM/DD') === dayjs().format('YYYY/MM/DD')) && (dayjs(record.start_time.seconds * 1000).format('HH') === time.split(':')[0]));
-
-    income = newRecord.reduce((accu, curr) => accu + curr.category.price, 0);
+    newRecord = data.order_record.filter((record) => (dayjs(record.start_time.seconds * 1000).format('YYYY/MM/DD') === dayjs().format('YYYY/MM/DD')) && (dayjs(record.start_time.seconds * 1000).format('HH') === time.split(':')[0]));
   }
   if (tab === '7Day') {
-    const newRecord = data.order_record.filter((record) => dayjs(record.start_time.seconds * 1000).format('YYYY/MM/DD') === time);
-    income = newRecord.reduce((accu, curr) => accu + curr.category.price, 0);
+    newRecord = data.order_record.filter((record) => dayjs(record.start_time.seconds * 1000).format('YYYY/MM/DD') === time);
   }
   if (tab === 'Month') {
-    const newRecord = data.order_record.filter((record) => dayjs(record.start_time.seconds * 1000).format('MMM DD') === time);
-    income = newRecord.reduce((accu, curr) => accu + curr.category.price, 0);
+    newRecord = data.order_record.filter((record) => dayjs(record.start_time.seconds * 1000).format('MMM DD') === time);
   }
   if (tab === 'Year') {
-    const newRecord = data.order_record.filter((record) => dayjs(record.start_time.seconds * 1000).format('MMM') === time);
-    income = newRecord.reduce((accu, curr) => accu + curr.category.price, 0);
+    newRecord = data.order_record.filter((record) => dayjs(record.start_time.seconds * 1000).format('MMM') === time);
   }
-  return income;
+  return newRecord.reduce((accu, curr) => accu + curr.category.price, 0);
 };
 
 export const DoughnutCustomerTime = (tab, data) => {

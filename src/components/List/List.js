@@ -2,14 +2,12 @@
 import styled from 'styled-components/macro';
 import { PropTypes } from 'prop-types';
 import dayjs from 'dayjs';
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState } from 'react';
 import { MonetizationOn, Adjust, Album } from '@styled-icons/material-rounded';
 import { Link } from 'react-router-dom';
-import {
-  firebaseUsers, firebaseMachines, firebaseProcessing, firebaseStores,
-} from '../../utils/firestore';
 import DefaultstoreMainImg from '../../style/imgs/storeMainImg.jpg';
 import Loading from '../Loading';
+import { archiveOrder } from '../../utils/reuseFunc';
 
 const duration = require('dayjs/plugin/duration');
 
@@ -236,42 +234,16 @@ export function ReserveList({ item, CancelReserve }) {
 }
 
 export function ProcessinfList({ item }) {
-  const userInfo = useContext(firebaseUsers.AuthContext);
   const [countDown, setCountDown] = useState('');
 
   useEffect(() => {
-    const finishedInStore = (orderData) => {
-      const newRecord = { ...orderData };
-      newRecord.user_id = userInfo.user_id;
-      firebaseStores.updateOrderRecord(newRecord.store_id, newRecord);
-    };
-    const finishedInUser = () => {
-      const orderData = {};
-
-      orderData.category = item.category;
-      orderData.machine_id = item.machine_id;
-      orderData.machine_name = item.machine_name;
-      orderData.start_time = item.start_time;
-      orderData.end_time = item.end_time;
-      orderData.store_id = item.store_id;
-      orderData.store_name = item.store_name;
-      orderData.process_id = item.process_id;
-
-      const newOrders = [...userInfo.orders, orderData];
-      const newRecords = [...userInfo.records, orderData];
-      finishedInStore(orderData);
-      firebaseUsers.addOrders(userInfo.user_id, newOrders);
-      firebaseUsers.updateRecords(userInfo.user_id, newRecords);
-      firebaseProcessing.delet(item.process_id);
-      firebaseMachines.updateStatus(item.machine_id, 0);
-    };
     if (item.process_id) {
       const handleCountDown = setInterval(() => {
         const endTimer = dayjs(item.end_time.seconds * 1000);
         const timeLeft = dayjs.duration(endTimer.diff(dayjs())).$d;
         if (timeLeft.minutes < 1 && timeLeft.seconds < 1) {
           clearInterval(handleCountDown);
-          finishedInUser();
+          archiveOrder([item]);
         } else {
           setCountDown(`${timeLeft.minutes} : ${timeLeft.seconds}`);
         }
