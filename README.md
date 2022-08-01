@@ -1,4 +1,5 @@
-# Self-service-laundry-platform
+![banner](./readmeGif/banner.jpg)
+# SéSann
 Do you always have to arrive at the laundromat to find out if there are any free machines?
 When it arrives at the laundromat, it is all in use. Is it a waste of time to wait for a long time?
 This platform is to solve the problem that the current laundromats make users have poor experience.
