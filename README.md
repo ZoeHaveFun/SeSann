@@ -14,19 +14,11 @@ This platform is to solve the problem that the current laundromats make users ha
   <summary>Table of Contents</summary>
   <ol>
     <li>
-      <a href="#technologies">Technologies</a>
+      <a href="#technologies-used">Technologies Used</a>
     </li>
-    <li>
-      <a href="#performance-tuning">Performance Tuning</a>
-    </li>
-    <li><a href="#flow-chart">Flow Chart</a></li>
-    <li><a href="#features">Features</a><ul>
-        <li><a href="#music-production">Music Production</a></li>
-        <li><a href="#social-interaction">Social Interaction</a></li>
-      </ul></li>
-    <li><a href="#future-improvement">Future Improvement</a></li>
+    <li><a href="#user-flow">User Flow</a></li>
+    <li><a href="#future-demo">Future Demo</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
 <br/>
@@ -56,3 +48,22 @@ This platform is to solve the problem that the current laundromats make users ha
 ## User Flow
 
 ![userflow](./readmeGif/sesannUserFlow.jpg)
+
+## Future Demo
+### HomePage
+![hompage](./readmeGif/hompage.gif)
+### StorePage
+![storepage](./readmeGif/storepage.gif)
+### UserPage
+![userpage](./readmeGif/userpage.gif)
+### BackstagePage
+![backstagepage](./readmeGif/backstagepage.gif)
+##  Contact
+
+Welcome for any suggestion or collaboration, feel free to contact me! 
+
+Created by **Zoe** [@ZoeHaveFun](https://github.com/ZoeHaveFun)  
+[zoehavefun06@gmail.com](mailto:zoehavefun06@gmail.com) | [Linkedin](https://www.linkedin.com/in/fan-zoe-b10480246/)
+
+
+<p align="right"><a href="#top">back to top</a></p>
