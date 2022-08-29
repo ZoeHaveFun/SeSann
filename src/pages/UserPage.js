@@ -166,8 +166,8 @@ const Button = styled(Link)`
   align-items: center;
   padding: 10px 4px 2px;
   text-align: center;
-  color:  ${(props) => (props.isSelect ? '#1C5174' : '#8B8C89')};
-  box-shadow: ${(props) => (props.isSelect ? '0px 2px #1C5174' : '')};
+  color:  ${(props) => (props.selected ? '#1C5174' : '#8B8C89')};
+  box-shadow: ${(props) => (props.selected ? '0px 2px #1C5174' : '')};
   text-decoration: none;
   transition: all .3s;
   &+& {
@@ -264,30 +264,30 @@ function UserPage() {
           </UserHeader>
           <MainContain>
             <TabBar>
-              <Button to="/user/processing" isSelect={currentTag === 'processing'}>
+              <Button to="/user/processing" selected={currentTag === 'processing'}>
                 <Icon>
                   <SettingsPower />
                 </Icon>
                 進行中
               </Button>
-              <Button to="/user/reserve" isSelect={currentTag === 'reserve'}>
+              <Button to="/user/reserve" selected={currentTag === 'reserve'}>
                 <Icon>
                   <CalendarToday />
                 </Icon>
                 預約中
               </Button>
-              <Button to="/user" isSelect={currentTag === 'user'}>
+              <Button to="/user" selected={currentTag === 'user'}>
                 <Icon bigger>
                   <Message />
                 </Icon>
               </Button>
-              <Button to="/user/orders" isSelect={currentTag === 'orders'}>
+              <Button to="/user/orders" selected={currentTag === 'orders'}>
                 <Icon>
                   <Inventory />
                 </Icon>
                 全部訂單
               </Button>
-              <Button to="/user/collect" isSelect={currentTag === 'collect'}>
+              <Button to="/user/collect" selected={currentTag === 'collect'}>
                 <Icon>
                   <HeartCircle />
                 </Icon>

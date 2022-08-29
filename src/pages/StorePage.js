@@ -209,7 +209,7 @@ const Tag = styled.span`
   padding: 8px 16px;
   box-shadow: 0px 0px 2px #8B8C89;
   border-radius: 20px;
-  background-color: ${(props) => (props.isSelect ? '#FFB703' : '#FEFCFB')};
+  background-color: ${(props) => (props.selected ? '#FFB703' : '#FEFCFB')};
   cursor: pointer;
   &+&{
     margin-left: 20px;
@@ -461,10 +461,10 @@ function StorePage() {
         <StoreHeader storeInfo={storeInfo} idleMachines={idleMachines} />
         <Container>
           <TagWrapper onClick={(e) => { ChangeTag(e); }}>
-            <Tag data-tag="all" isSelect={tag === 'all'}>全部</Tag>
-            <Tag data-tag="wash" isSelect={tag === 'wash'}>洗衣</Tag>
-            <Tag data-tag="dry" isSelect={tag === 'dry'}>烘衣</Tag>
-            <Tag data-tag="pet" isSelect={tag === 'pet'}>寵物專用</Tag>
+            <Tag data-tag="all" selected={tag === 'all'}>全部</Tag>
+            <Tag data-tag="wash" selected={tag === 'wash'}>洗衣</Tag>
+            <Tag data-tag="dry" selected={tag === 'dry'}>烘衣</Tag>
+            <Tag data-tag="pet" selected={tag === 'pet'}>寵物專用</Tag>
           </TagWrapper>
           <MachinesWrapper>
             {filterMachines.length === 0 ? <p>沒有餒~</p>

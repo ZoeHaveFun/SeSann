@@ -87,7 +87,7 @@ const CategoryBtn = styled(Button)`
   width: 100%;
   padding: 8px 10px;
   margin: 0px;
-  background-color: ${(props) => (props.isSelected ? '#FFB703' : '')};
+  background-color: ${(props) => (props.selected ? '#FFB703' : '')};
   display: flex;
   color: #1C5174;
   >span{
@@ -168,18 +168,18 @@ function MachineCard({
             <CategoryBtn
               onClick={() => clickCategory(idx)}
               key={category.name}
-              isSelected={categoryIndex === idx}
+              selected={categoryIndex === idx}
             >
               <NameSpan>
                 {category.name}
               </NameSpan>
               <TimeSpan>
                 <AccessTime />
-                {category.time}
+                {`${category.time} 分鐘`}
               </TimeSpan>
               <PriceSpan>
                 <MonetizationOn />
-                {category.price}
+                {`${category.price} 元`}
               </PriceSpan>
             </CategoryBtn>
           ))

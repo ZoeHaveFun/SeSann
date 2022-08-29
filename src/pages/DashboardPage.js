@@ -70,18 +70,18 @@ const TabWrapper = styled.div`
 const Tab = styled.button`
   font-size: 14px;
   font-family: 'Noto Sans TC', sans-serif;
-  color: ${(props) => (props.isSelect ? '#FEFCFB' : '#8B8C89')};
+  color: ${(props) => (props.selected ? '#FEFCFB' : '#8B8C89')};
   padding: 4px 14px;
   border-radius: 0.6rem;
   box-shadow: 0px 0px 4px #8B8C89;
-  background-color: ${(props) => (props.isSelect ? '#ebb12b' : '')};
+  background-color: ${(props) => (props.selected ? '#ebb12b' : '')};
   cursor: pointer;
   &+& {
     margin-left: 16px;
   }
   &:hover{
-    color: ${(props) => (props.isSelect ? '#FEFCFB' : '#1C5174')};
-    background-color: ${(props) => (props.isSelect ? '#ebb12b' : '#FEFCFB')};
+    color: ${(props) => (props.selected ? '#FEFCFB' : '#1C5174')};
+    background-color: ${(props) => (props.selected ? '#ebb12b' : '#FEFCFB')};
     box-shadow: 0px 0px 2px 1px #8B8C89;
   }
 `;
@@ -161,10 +161,10 @@ function DashboardPage() {
       <NavWrapper>
         Range
         <TabWrapper>
-          <Tab isSelect={selectTab === 'Today'} onClick={() => { changeRange('Today'); }}>Today</Tab>
-          <Tab isSelect={selectTab === '7Day'} onClick={() => { changeRange('7Day'); }}>7 Day</Tab>
-          <Tab isSelect={selectTab === 'Month'} onClick={() => { changeRange('Month'); }}>Month</Tab>
-          <Tab isSelect={selectTab === 'Year'} onClick={() => { changeRange('Year'); }}>Year</Tab>
+          <Tab selected={selectTab === 'Today'} onClick={() => { changeRange('Today'); }}>Today</Tab>
+          <Tab selected={selectTab === '7Day'} onClick={() => { changeRange('7Day'); }}>7 Day</Tab>
+          <Tab selected={selectTab === 'Month'} onClick={() => { changeRange('Month'); }}>Month</Tab>
+          <Tab selected={selectTab === 'Year'} onClick={() => { changeRange('Year'); }}>Year</Tab>
         </TabWrapper>
       </NavWrapper>
       <Wrapper>

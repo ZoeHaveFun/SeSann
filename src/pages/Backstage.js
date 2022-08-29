@@ -179,8 +179,8 @@ const Button = styled(Link)`
   align-items: center;
   padding: 10px 4px 2px;
   text-align: center;
-  color:  ${(props) => (props.isSelect ? '#1C5174' : '#8B8C89')};
-  box-shadow: ${(props) => (props.isSelect ? '0px 2px #1C5174' : '')};
+  color:  ${(props) => (props.selected ? '#1C5174' : '#8B8C89')};
+  box-shadow: ${(props) => (props.selected ? '0px 2px #1C5174' : '')};
   text-decoration: none;
   transition: all .3s;
   &+& {
@@ -275,18 +275,18 @@ function Backstage() {
           </StoreHeader>
           <MainContain>
             <TabBar>
-              <Button to="/store/backstage/manage" isSelect={currentTag === 'manage'}>
+              <Button to="/store/backstage/manage" selected={currentTag === 'manage'}>
                 <Icon>
                   <LocalLaundryService />
                 </Icon>
                 管理
               </Button>
-              <Button to="/store/backstage" isSelect={currentTag === 'backstage'}>
+              <Button to="/store/backstage" selected={currentTag === 'backstage'}>
                 <Icon bigger>
                   <InsertChartOutlined />
                 </Icon>
               </Button>
-              <Button to="/store/backstage/setting" isSelect={currentTag === 'setting'}>
+              <Button to="/store/backstage/setting" selected={currentTag === 'setting'}>
                 <Icon>
                   <SettingsSuggest />
                 </Icon>
