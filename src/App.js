@@ -37,7 +37,7 @@ function App() {
       .then((data) => { initialData('processing', data); });
   }, [isSignIn]);
   useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
+    onAuthStateChanged(auth, (user) => {
       if (user) {
         setIsSignIn(true);
       } else {

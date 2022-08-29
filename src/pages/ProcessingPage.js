@@ -12,7 +12,6 @@ const Wrapper = styled.div`
   gap: 12px 0px;
 `;
 const Message = styled.h3`
-  width: 100%;
   box-shadow: 0px 0px 8px #e7ecef;
   border-radius: 0.8rem;
   padding: 20px 0px;
