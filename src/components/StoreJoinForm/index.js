@@ -92,15 +92,15 @@ const SecTitle = styled.div`
 
 function StoreJoinForm() {
   const userInfo = useContext(firebaseUsers.AuthContext);
-  const storeNameRef = useRef(null);
-  const storePhoneRef = useRef(null);
-  const [storeAddress, setStoreAddress] = useState(null);
+  const storeNameRef = useRef('');
+  const storePhoneRef = useRef('');
+  const [storeAddress, setStoreAddress] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
   const geoKey = 'AIzaSyAKvX91_wrPBCvJUcPDFCVF18upOWq7GdM';
 
   const handlePostStore = () => {
-    if (userInfo === null) {
+    if (userInfo === '') {
       Swal.fire({
         title: '您還未登入',
         text: '需登入後再入駐店家',
@@ -117,9 +117,9 @@ function StoreJoinForm() {
       });
       return;
     }
-    if (storeNameRef.current.value === null
-      || storePhoneRef.current.value === null
-      || storeAddress === null) {
+    if (storeNameRef.current.value === ''
+      || storePhoneRef.current.value === ''
+      || storeAddress === '') {
       Toast.fire({
         icon: 'error',
         title: '店家名稱、電話、地址不得為空',

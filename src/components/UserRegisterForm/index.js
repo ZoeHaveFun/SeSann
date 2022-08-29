@@ -88,19 +88,19 @@ const SecTitle = styled.div`
   }
 `;
 function UserRegisterForm() {
-  const registerName = useRef(null);
-  const registerEmail = useRef(null);
-  const registerPassword = useRef(null);
+  const registerName = useRef('');
+  const registerEmail = useRef('');
+  const registerPassword = useRef('');
 
   const postRegister = async () => {
-    if (registerName.current.value === null) {
+    if (registerName.current.value === '') {
       Toast.fire({
         icon: 'error',
         title: '請輸入名稱',
       });
       return;
     }
-    if (registerEmail.current.value === null || registerPassword.current.value === null) {
+    if (registerEmail.current.value === '' || registerPassword.current.value === '') {
       Toast.fire({
         icon: 'error',
         title: '帳號密碼不能為空',
