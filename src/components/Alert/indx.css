@@ -37,6 +37,9 @@
 .colored-toast .swal2-html-container {
   color: white;
 }
+.swal2-styled.swal2-confirm:focus {
+  box-shadow: 0 0 0 3px rgb(165, 190, 0, 0.5);
+}
 .swal2-icon.swal2-info {
   color: #327CA7;
   border-color: #87adbd;
