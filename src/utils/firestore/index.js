@@ -27,25 +27,26 @@ export const db = getFirestore(app);
 
 export const firebaseUsers = {
   tableName: 'Users',
-  async register(name, email, password) {
-    const result = await createUserWithEmailAndPassword(auth, email, password);
-    await setDoc(doc(db, this.tableName, result.user.uid), {
-      user_id: result.user.uid,
-      user_name: name,
-      points: 1000,
-      orders: [],
-      records: [],
-      storeIds: [],
-      collectIds: [],
-    });
+  register(name, email, password) {
+    return createUserWithEmailAndPassword(auth, email, password)
+      .then((res) => {
+        setDoc(doc(db, this.tableName, res.user.uid), {
+          user_id: res.user.uid,
+          user_name: name,
+          points: 1000,
+          orders: [],
+          records: [],
+          storeIds: [],
+          collectIds: [],
+        });
+        return 'success';
+      })
+      .catch((err) => err.code);
   },
   signIn(email, password) {
     return setPersistence(auth, browserSessionPersistence)
       .then(() => signInWithEmailAndPassword(auth, email, password))
-      .catch(async (error) => {
-        const errorMessage = await error.message;
-        return errorMessage;
-      });
+      .catch((error) => error.code);
   },
   signOut() {
     signOut(auth).then(() => {
