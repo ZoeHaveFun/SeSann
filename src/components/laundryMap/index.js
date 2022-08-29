@@ -31,12 +31,26 @@ const Wrapper = styled.div`
   flex-direction: column;
   justify-content: center;
 `;
-
 const MapWrapper = styled.div`
   height: 440px;
   width: 80%;
   margin: auto;
   z-index: 2;
+  position: relative;
+`;
+const NoResultPopup = styled.span`
+  z-index: 1000;
+  opacity: ${(props) => (props.noResult ? '1' : '0')};
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Noto Sans TC', sans-serif;
+  border-radius: 0.8rem;
+  padding: 22px 16px;
+  box-shadow: 0px 0px 8px #8B8C89;
+  background-color: rgb(231 236 239 / 60%);
+  color: #023047;
 `;
 
 const SelectWrapper = styled.div`
@@ -286,7 +300,7 @@ function MapMarker({ store }) {
               && idleMachines?.dry?.length === 0
               && idleMachines?.wash?.length === 0 ? (
                 <NoIdleMachine>
-                  拍謝~(๑•́ ₃ •̀๑)
+                  很抱歉，
                   <br />
                   目前沒有空閒的機台
                 </NoIdleMachine>
@@ -317,54 +331,40 @@ MapMarker.propTypes = {
   }).isRequired,
 };
 
-const TitleDiv = styled.div`
-  width: 80%;
-  display: flex;
-  margin: auto;
-  margin-bottom: 10px;
-  font-family: 'Noto Sans TC', sans-serif;
-  color:  #1C5174;
-  & >h2 {
-    font-size: 42px;
-    margin-right: 10px;
-    letter-spacing: 0.2rem;
-  }
-`;
-const SecTitle = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding-bottom: 4px;
-  font-size: 16px;
-  font-weight: 500;
-  span:nth-child(2) {
-    display: inline-block;
-    background-color: #DDE1E4;
-    padding: 1px 8px;
-    margin-top: 2px;
-    width: 60px;
-  }
-`;
 function LaundryMap() {
   const [location, setLocation] = useState([23.991074, 121.611198]);
-  const mapRef = useRef(null);
+  const mapRef = useRef('');
   const [boundry, setBoundry] = useState([]);
   const [city, setCity] = useState('');
   const [district, setDistrict] = useState('');
   const [districts, setDistricts] = useState([]);
   const [stores, setStores] = useState([]);
   const [storesMarker, setStoresMarker] = useState([]);
+  const [noResult, setNoResult] = useState(false);
 
   const attributionUrl = '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
   const mapApiKey = `https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=${process.env.REACT_APP_LEAFLET_MAP_APIKEY}`;
 
-  useEffect(() => {
-    if (city === '' && district === '') return;
-    const cityFilter = stores.filter((store) => store.city === city);
-    setStoresMarker(cityFilter);
-    const newBounds = cityFilter.map((store) => [store.location.lat, store.location.lng]);
+  const handleResult = (result) => {
+    if (result.length === 0) {
+      setNoResult(true);
+    } else { setNoResult(false); }
+    setStoresMarker(result);
+    const newBounds = result.map((store) => [store.location.lat, store.location.lng]);
     newBounds.push(location);
     setBoundry(newBounds);
+  };
+
+  useEffect(() => {
+    if (city === '' && district === '') return;
+    if (city !== '' && district === '') {
+      const cityFilter = stores.filter((store) => store.city === city);
+      handleResult(cityFilter);
+    } else {
+      const cityFilter = stores.filter((store) => store.city === city
+      && store.districts === district);
+      handleResult(cityFilter);
+    }
   }, [city, district]);
 
   useEffect(() => {
@@ -382,13 +382,6 @@ function LaundryMap() {
 
   return (
     <Wrapper>
-      {/* <TitleDiv>
-        <h2>找一找</h2>
-        <SecTitle>
-          <span>附近的自助洗衣</span>
-          <span />
-        </SecTitle>
-      </TitleDiv> */}
       <SelectLocationBar
         city={city}
         setCity={setCity}
@@ -398,10 +391,15 @@ function LaundryMap() {
         setDistricts={setDistricts}
       />
       <MapWrapper>
+        <NoResultPopup noResult={noResult}>
+          很抱歉，
+          <br />
+          這地區沒有SéSann的夥伴喔
+        </NoResultPopup>
         <MapContainer
           center={location}
           zoom={9}
-          bounds={mapRef.current ? boundry : null}
+          bounds={mapRef.current ? boundry : ''}
           ref={mapRef}
           scrollWheelZoom
           style={{ width: '100%', height: '100%', borderRadius: '0.8rem' }}
