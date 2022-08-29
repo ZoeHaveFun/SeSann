@@ -196,7 +196,7 @@ function AddMachineForm({ storeId, setIsAdd }) {
     });
   };
   return (
-    <Wrapper>
+    <Wrapper onKeyUp={(e) => { if (e.key === 'Enter') { handlePostMachine(); } }}>
       <CloseBtn onClick={() => { setIsAdd(false); }}>
         <Close />
       </CloseBtn>
