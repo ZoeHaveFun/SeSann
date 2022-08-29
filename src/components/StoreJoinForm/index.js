@@ -5,6 +5,7 @@ import axios from 'axios';
 import styled from 'styled-components/macro';
 import Swal from 'sweetalert2';
 import { firebaseUsers, firebaseStores } from '../../utils/firestore';
+import { Toast } from '../Alert';
 
 const Wrapper = styled.div`
   padding-top: 20px;
@@ -93,14 +94,37 @@ function StoreJoinForm() {
   const userInfo = useContext(firebaseUsers.AuthContext);
   const storeNameRef = useRef(null);
   const storePhoneRef = useRef(null);
-  const [storeAddress, setStoreAddress] = useState('');
+  const [storeAddress, setStoreAddress] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   const geoKey = 'AIzaSyAKvX91_wrPBCvJUcPDFCVF18upOWq7GdM';
 
   const handlePostStore = () => {
-    if (!userInfo.user_id) {
-      window.location.href = './login';
+    if (userInfo === null) {
+      Swal.fire({
+        title: '您還未登入',
+        text: '需登入後再入駐店家',
+        icon: 'info',
+        showCancelButton: true,
+        customClass: {
+          popup: 'secondReserve',
+        },
+        cancelButtonText: '取消',
+        confirmButtonText: '好的',
+      }).then(async (result) => {
+        if (result.isConfirmed === false) return;
+        window.location.href = './login';
+      });
+      return;
+    }
+    if (storeNameRef.current.value === null
+      || storePhoneRef.current.value === null
+      || storeAddress === null) {
+      Toast.fire({
+        icon: 'error',
+        title: '店家名稱、電話、地址不得為空',
+      });
+      return;
     }
     axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${storeAddress}&key=${geoKey}`)
       .then((res) => {
@@ -146,19 +170,21 @@ function StoreJoinForm() {
           </SecTitle>
         </TitleDiv>
         <div>
-          <label htmlFor="storeName">
-            店家名稱:
-            <input type="text" name="storeName" placeholder="你的店名..." ref={storeNameRef} />
-          </label>
-          <label htmlFor="storeAddress">
-            店家地址:
-            <input type="text" name="storeAddress" value={storeAddress} placeholder="店在哪裡..." onChange={(e) => { setStoreAddress(e.target.value); }} />
-          </label>
-          <p>{errorMessage}</p>
-          <label htmlFor="storePhone">
-            電話
-            <input type="text" name="storePhone" placeholder="連絡電話..." ref={storePhoneRef} />
-          </label>
+          <form>
+            <label htmlFor="storeName">
+              店家名稱:
+              <input type="text" name="storeName" placeholder="你的店名..." ref={storeNameRef} />
+            </label>
+            <label htmlFor="storeAddress">
+              店家地址:
+              <input type="text" name="storeAddress" value={storeAddress} placeholder="店在哪裡..." onChange={(e) => { setStoreAddress(e.target.value); }} />
+            </label>
+            <p>{errorMessage}</p>
+            <label htmlFor="storePhone">
+              電話:
+              <input type="text" name="storePhone" placeholder="連絡電話..." ref={storePhoneRef} />
+            </label>
+          </form>
         </div>
 
         <Button type="submit" onClick={() => handlePostStore()}>加入</Button>

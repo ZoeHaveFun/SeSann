@@ -88,25 +88,59 @@ const SecTitle = styled.div`
   }
 `;
 function UserRegisterForm() {
-  const registerName = useRef();
-  const registerEmail = useRef();
-  const registerPassword = useRef();
+  const registerName = useRef(null);
+  const registerEmail = useRef(null);
+  const registerPassword = useRef(null);
 
-  const postRegister = () => {
-    firebaseUsers.register(
+  const postRegister = async () => {
+    if (registerName.current.value === null) {
+      Toast.fire({
+        icon: 'error',
+        title: '請輸入名稱',
+      });
+      return;
+    }
+    if (registerEmail.current.value === null || registerPassword.current.value === null) {
+      Toast.fire({
+        icon: 'error',
+        title: '帳號密碼不能為空',
+      });
+      return;
+    }
+    const result = await firebaseUsers.register(
       registerName.current.value,
       registerEmail.current.value,
       registerPassword.current.value,
     );
-
-    registerName.current.value = '';
-    registerEmail.current.value = '';
-    registerPassword.current.value = '';
-
-    Toast.fire({
-      icon: 'success',
-      title: '註冊成功',
-    });
+    if (result === 'success') {
+      registerName.current.value = '';
+      registerEmail.current.value = '';
+      registerPassword.current.value = '';
+      Toast.fire({
+        icon: 'success',
+        title: '註冊成功',
+      });
+    } else if (result === 'auth/email-already-in-use') {
+      Toast.fire({
+        icon: 'error',
+        title: 'email已被註冊',
+      });
+    } else if (result === 'auth/weak-password') {
+      Toast.fire({
+        icon: 'error',
+        title: '密碼須超過6碼',
+      });
+    } else if (result === 'auth/invalid-email') {
+      Toast.fire({
+        icon: 'error',
+        title: 'email地址無效',
+      });
+    } else {
+      Toast.fire({
+        icon: 'error',
+        title: result,
+      });
+    }
   };
   return (
     <Wrapper>
@@ -119,18 +153,20 @@ function UserRegisterForm() {
           </SecTitle>
         </TitleDiv>
         <div>
-          <label htmlFor="registerName">
-            名稱
-            <input type="text" name="registerName" placeholder="怎麼稱呼你呢" ref={registerName} />
-          </label>
-          <label htmlFor="registerEmail">
-            Email
-            <input type="email" name="registerEmail" placeholder="輸入email" ref={registerEmail} />
-          </label>
-          <label htmlFor="registerPassword">
-            密碼
-            <input type="password" name="registerPassword" placeholder="輸入密碼" ref={registerPassword} />
-          </label>
+          <form>
+            <label htmlFor="registerName">
+              名稱:
+              <input type="text" name="registerName" placeholder="怎麼稱呼你呢" ref={registerName} />
+            </label>
+            <label htmlFor="registerEmail">
+              Email:
+              <input type="email" name="registerEmail" placeholder="輸入email" ref={registerEmail} />
+            </label>
+            <label htmlFor="registerPassword">
+              密碼:
+              <input type="password" name="registerPassword" autoComplete="off" placeholder="輸入密碼" ref={registerPassword} />
+            </label>
+          </form>
         </div>
         <Button type="button" onClick={postRegister}>加入</Button>
       </RegisterForm>
