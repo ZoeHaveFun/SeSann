@@ -168,7 +168,7 @@ export function OrderList({ item }) {
         <TimeLine>
           <Album />
           <span>
-            <span>{`${item.category.time} m`}</span>
+            <span>{`${item.category.time} 分鐘`}</span>
           </span>
           <Album />
         </TimeLine>
@@ -209,7 +209,7 @@ export function ReserveList({ item, CancelReserve }) {
         <TimeLine>
           <Adjust />
           <span>
-            <span>{`${item.category.time} m`}</span>
+            <span>{`${item.category.time} 分鐘`}</span>
           </span>
           <Adjust />
         </TimeLine>
@@ -234,7 +234,8 @@ export function ReserveList({ item, CancelReserve }) {
 }
 
 export function ProcessinfList({ item }) {
-  const [countDown, setCountDown] = useState('');
+  const [minutes, setMinutes] = useState('');
+  const [seconds, setSeconds] = useState('');
 
   useEffect(() => {
     if (item.process_id) {
@@ -245,7 +246,8 @@ export function ProcessinfList({ item }) {
           clearInterval(handleCountDown);
           archiveOrder([item]);
         } else {
-          setCountDown(`${timeLeft.minutes} : ${timeLeft.seconds}`);
+          setMinutes(timeLeft.minutes.toString().padStart(2, 0));
+          setSeconds(timeLeft.seconds.toString().padStart(2, 0));
         }
       }, 1000);
     }
@@ -270,7 +272,7 @@ export function ProcessinfList({ item }) {
         <TimeLine>
           <Album />
           <span>
-            { countDown ? <span>{`${countDown} m`}</span>
+            { minutes || seconds ? <span>{`${minutes}分 ${seconds}秒`}</span>
               : <Loading />}
           </span>
           <Adjust />
